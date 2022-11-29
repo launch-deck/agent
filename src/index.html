@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>LaunchDeck Agent</title>
+        <link rel="stylesheet" href="index.css" />
+    </head>
+    <body>
+
+        <div class="container">
+            <div class="form-horizontal row col-md-12">
+                <div class="form-group col-md-8">
+                    <label class="control-label">LaunchDeck Server Address</label>
+                    <input type="url" class="form-control" id="serverInput"/>
+                </div>
+                <div class="form-group col-md-4">
+                    <label class="control-label">Agent Code</label>
+                    <input type="text" class="form-control" id="codeInput"/>
+                </div>
+                <div class="col-12 align-self-center" style="margin-top: 1rem;">
+                    <button type="submit" class="btn btn-primary" id="connectBTN">Connect</button>
+                </div>
+            </div>
+        </div>
+
+        <script src="../dist/renderer.js" defer></script>
+    </body>
+</html>

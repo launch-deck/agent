@@ -1,0 +1,36 @@
+name: Release
+
+# This runs whenever a new version of the agent is created (npm version patch && git push --follow-tags)
+# This will kick off an action in GitHub to publish the Electron app for Windows, Linux and Mac
+# Electron Forge will create a new draft release in GitHub for the agent with the binaries attached
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  release:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16.x
+    - name: Restore Agent NPM dependencies
+      run: npm ci
+
+    - name: publish
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: npm run publish

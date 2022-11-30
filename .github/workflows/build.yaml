@@ -11,7 +11,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [macos-latest, ubuntu-20.04, windows-latest]
 
     steps:
     - uses: actions/checkout@v2
@@ -22,10 +22,6 @@ jobs:
         node-version: 16.x
     - name: Restore Agent NPM dependencies
       run: npm ci
-
-    - name: Install rpm
-      if: ${{ matrix.os == 'ubuntu-latest' }}
-      run: sudo apt-get install -y rpm
 
     - name: make
       run: npm run make

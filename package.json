@@ -1,5 +1,5 @@
 {
-    "name": "@launch-deck/agent",
+    "name": "launch-deck-agent",
     "productName": "LaunchDeck Agent",
     "version": "0.0.0",
     "description": "Virtual application launcher, macro-pad and automation tool",

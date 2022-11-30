@@ -30,6 +30,10 @@ jobs:
     - name: Restore Agent NPM dependencies
       run: npm ci
 
+    - name: Install xmllint
+      if: ${{ matrix.os == 'ubuntu-latest' }}
+      run: sudo apt-get install -y rpm
+
     - name: publish
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

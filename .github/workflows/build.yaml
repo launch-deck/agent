@@ -23,7 +23,7 @@ jobs:
     - name: Restore Agent NPM dependencies
       run: npm ci
 
-    - name: Install xmllint
+    - name: Install rpm
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: sudo apt-get install -y rpm
 

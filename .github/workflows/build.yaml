@@ -7,11 +7,10 @@ on:
 jobs:
   build-agent:
     runs-on: ${{ matrix.os }}
-    continue-on-error: true
 
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-20.04, windows-latest]
+        os: [macos-latest, windows-latest]
 
     steps:
     - uses: actions/checkout@v2

@@ -27,8 +27,14 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: 16.x
+        cache: 'npm'
+        cache-dependency-path: |
+          package-lock.json
+          app/package-lock.json
     - name: Restore Agent NPM dependencies
-      run: npm ci
+      run: |
+        npm ci
+        npm ci --prefix app
 
     - name: publish
       env:

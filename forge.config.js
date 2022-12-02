@@ -1,7 +1,12 @@
 module.exports = {
     packagerConfig: {
         ignore: [
+            "^/[.]github$",
+            "^/app$",
+            "^/out$",
+            "^/scratch$",
             "^/src$",
+            "^/[.]gitignore$",
             "^/tsconfig[.]json$"
         ]
     },

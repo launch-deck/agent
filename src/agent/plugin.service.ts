@@ -2,10 +2,14 @@ import { app } from "electron";
 import { existsSync, readdirSync, readFileSync } from "original-fs";
 import { join } from 'path';
 import type { Plugin } from "@launch-deck/common";
+import { PluginWorker } from "./plugin-worker.class";
+import { Subject } from "rxjs";
 
 export class PluginService {
 
-    private plugins: Plugin[] = [];
+    private plugins: PluginWorker[] = [];
+
+    pluginStatus: Subject<PluginWorker[]> = new Subject();
 
     /**
      * Gets the paths to look for plugins
@@ -25,21 +29,38 @@ export class PluginService {
     /**
      * Loads plugins
      */
-    public loadPlugins(): void {
-        this.pluginPaths.forEach(path => {
+    public async loadPlugins(): Promise<void> {
 
+        for (let path of this.pluginPaths) {
             if (existsSync(path)) {
                 console.log(`Loading plugins from: ${path}`);
 
                 const plugins = readdirSync(path);
 
-                plugins.forEach(plugin => {
-                    this.loadPlugin(plugin, path);
-                });
+                for (let plugin of plugins) {
+                    await this.loadPlugin(plugin, path);
+                }
             } else {
                 console.log(`Plugin dir not found: ${path}`);
             }
-        });
+        }
+
+        this.pluginStatus.next(this.plugins);
+    }
+
+    public async startPlugin(ns: string) {
+        await this.getPlugin(ns)?.start();
+        this.pluginStatus.next(this.plugins);
+    }
+
+    public stopPlugin(ns: string) {
+        this.getPlugin(ns)?.stop();
+        this.pluginStatus.next(this.plugins);
+    }
+
+    public stopAllPlugins(): void {
+        this.plugins.forEach(plugin => plugin.stop());
+        this.pluginStatus.next(this.plugins);
     }
 
     /**
@@ -48,7 +69,7 @@ export class PluginService {
      * @param ns the plugin namespace
      * @returns the plugin or undefined
      */
-    public getPlugin(ns?: string): Plugin | undefined {
+    public getPlugin(ns?: string): PluginWorker | undefined {
         return this.plugins.find(plugin => plugin.ns === ns);
     }
 
@@ -98,15 +119,12 @@ export class PluginService {
                 return;
             }
 
-            const plugin: Plugin = (await import(pluginInfo.main)).default;
+            const plugin: PluginWorker = new PluginWorker(pluginInfo);
 
-            if (plugin) {
-                plugin.ns = pluginInfo.name;
-                if (typeof plugin.handleCommand === "function" && typeof plugin.getCommands === "function") {
-                    console.log(`Plugin loaded: ${pluginInfo.name || pluginInfo.main}`)
-                    this.plugins.push(plugin);
-                }
-            }
+            await plugin.start();
+
+            console.log(`Plugin loaded: ${pluginInfo.name || pluginInfo.main}`)
+            this.plugins.push(plugin);
 
         } catch (e) {
             console.error(`Error loading plugin ${pluginInfo.main}`, e);

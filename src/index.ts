@@ -11,24 +11,33 @@ if (require('electron-squirrel-startup')) {
 
 let mainWindow: BrowserWindow | null;
 let connectionState: ConnectionState = ConnectionState.disconnected;
+let pluginsStatus: { ns: string, started: boolean }[] = [];
+
 const agentService = new AgentService();
-agentService.connectionObservable.subscribe((state) => {
+
+const connectionSubscription = agentService.connectionObservable.subscribe((state) => {
     connectionState = state;
     mainWindow?.webContents.send('connection', connectionState);
 });
+const pluginSubscription = agentService.pluginStatus.subscribe(plugins => {
+    pluginsStatus = plugins.map(plugin => ({ ns: plugin.ns, started: plugin.started }));
+    mainWindow?.webContents.send('pluginStatus', pluginsStatus);
+});
+agentService.init();
 
 const createWindow = (): void => {
     // Create the browser window.
     mainWindow = new BrowserWindow({
-        height: 600,
-        width: 800,
+        height: 500,
+        width: 400,
+        autoHideMenuBar: true,
         webPreferences: {
             preload: path.join(__dirname, "preload.js")
         },
     });
 
     // and load the index.html of the app.
-    mainWindow.loadURL(path.join(__dirname, "../src/index.html"));
+    mainWindow.loadURL(path.join(__dirname, "app/index.html"));
 
     // Open the DevTools.
     //mainWindow.webContents.openDevTools();
@@ -37,8 +46,8 @@ const createWindow = (): void => {
     mainWindow.webContents.send('connection', connectionState);
 
     // Watch for client commands
-    ipcMain.on('connect', async (_, serverAddress: string, agentCode: string) => await agentService.connect(serverAddress, agentCode));
-    ipcMain.on('disconnect', () => agentService.disconnect());
+    ipcMain.handle('connect', async (_, serverAddress: string, agentCode: string) => await agentService.connect(serverAddress, agentCode));
+    ipcMain.handle('disconnect', () => agentService.disconnect());
     ipcMain.handle('getConnectionSettings', async () => {
         const stored = await agentService.getStoredConnectionSettings();
 
@@ -51,6 +60,9 @@ const createWindow = (): void => {
         };
     });
     ipcMain.handle('getConnectionState', () => connectionState);
+    ipcMain.handle('getPluginStatus', () => pluginsStatus);
+    ipcMain.handle('startPlugin', (_, ns: string) => agentService.startPlugin(ns));
+    ipcMain.handle('stopPlugin', (_, ns: string) => agentService.stopPlugin(ns));
 };
 
 // This method will be called when Electron has finished
@@ -63,6 +75,9 @@ app.on('ready', createWindow);
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
+        connectionSubscription.unsubscribe();
+        pluginSubscription.unsubscribe();
+        agentService.stopAllPlugins();
         app.quit();
     }
 });

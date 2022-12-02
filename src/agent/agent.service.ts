@@ -26,6 +26,10 @@ export class AgentService {
         return this.client.connectionObservable;
     };
 
+    public get pluginStatus() {
+        return this.pluginService.pluginStatus;
+    }
+
     constructor() {
         this.client = new AgentHubService();
         this.dataService = new DataService();
@@ -75,7 +79,9 @@ export class AgentService {
                 console.log("No Tile Commands Found: " + tileId);
             }
         });
+    }
 
+    public init(): void {
         this.dataService.loadData();
         this.pluginService.loadPlugins();
     }
@@ -124,6 +130,18 @@ export class AgentService {
     public disconnect(): void {
         this.unsubscribe();
         this.client.stopConnection();
+    }
+
+    public startPlugin(ns: string): void {
+        this.pluginService.startPlugin(ns);
+    }
+
+    public stopPlugin(ns: string): void {
+        this.pluginService.stopPlugin(ns);
+    }
+
+    public stopAllPlugins(): void {
+        this.pluginService.stopAllPlugins();
     }
 
     private unsubscribe(): void {

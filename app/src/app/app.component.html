@@ -1,0 +1,23 @@
+<div class="connection-settings">
+    <mat-form-field>
+        <mat-label>Server Address</mat-label>
+        <input matInput type="text" [disabled]="connectionState !== 0" [(ngModel)]="serverAddress">
+    </mat-form-field>
+    
+    <mat-form-field>
+        <mat-label>Agent Code</mat-label>
+        <input matInput type="text" [disabled]="connectionState !== 0" [(ngModel)]="agentCode">
+    </mat-form-field>
+    
+    <button mat-raised-button [class.spinner]="connectionState === 1" [ngSwitch]="connectionState" (click)="connect()" [color]="connectionState === 2 ? 'primary' : ''">
+        <span *ngSwitchCase="0">Connect</span>
+        <span *ngSwitchCase="1">Connecting</span>
+        <span *ngSwitchCase="2">Disconnect</span>
+    </button>
+</div>
+
+<div class="plugins">
+    <div *ngFor="let plugin of plugins">
+        <mat-slide-toggle color="primary" [checked]="plugin.started" (change)="updatePlugin(plugin)">{{plugin.ns}}</mat-slide-toggle>
+    </div>
+</div>

@@ -5,11 +5,16 @@
     "description": "Virtual application launcher, macro-pad and automation tool",
     "main": "dist/index.js",
     "scripts": {
-        "start": "set NODE_ENV=development&& tsc && electron-forge start",
-        "make": "tsc && electron-forge make",
-        "publish": "tsc && electron-forge publish",
+        "build": "npm run build-app && npm run build-agent",
+        "build-app": "npm run build --prefix app --configuration=production",
+        "build-agent": "tsc",
+        "package": "npm run build && electron-forge package",
+        "make": "npm run build && electron-forge make",
+        "publish": "npm run build && electron-forge publish",
+        "ng": "npm run ng --prefix app",
         "tsc": "tsc",
-        "tsc-watch": "tsc --watch"
+        "watch": "npm run watch --prefix app",
+        "start": "set NODE_ENV=development&& tsc && electron-forge start"
     },
     "keywords": [],
     "author": {

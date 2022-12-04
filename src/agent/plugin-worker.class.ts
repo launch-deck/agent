@@ -3,6 +3,7 @@ import { EventEmitter } from 'events';
 import { Worker } from 'worker_threads';
 import { WorkerMessage } from './worker-message.interface';
 import type { Command, Plugin } from "@launch-deck/common";
+import { log, error } from 'electron-log';
 
 export class PluginWorker implements Plugin {
 
@@ -25,11 +26,11 @@ export class PluginWorker implements Plugin {
         if (this.started) {
             return;
         }
-        console.log(`Plugin started: ${this.ns}`);
+        log(`Plugin started: ${this.ns}`);
         this.worker = new Worker('./dist/agent/plugin-worker-thread.js', { workerData: this.pluginInfo });
         this.worker.on('message', (message) => this.messages.next(message));
-        this.worker.on('error', (e) => console.log(`${this.ns} Worker error: ${e}`));
-        this.worker.on('exit', (code) => console.log(`${this.ns} Worker stopped with exit code ${code}`));
+        this.worker.on('error', (e) => error(`${this.ns} Worker error: ${e}`));
+        this.worker.on('exit', (code) => log(`${this.ns} Worker stopped with exit code ${code}`));
 
         this.settingsKeys = await this._getSettingsKeys();
 
@@ -50,7 +51,7 @@ export class PluginWorker implements Plugin {
         if (!this.started) {
             return;
         }
-        console.log(`Plugin stopped: ${this.ns}`);
+        log(`Plugin stopped: ${this.ns}`);
         this.sub?.unsubscribe();
         this.sendMessage({ action: 'exit' });
         this.worker?.removeAllListeners();

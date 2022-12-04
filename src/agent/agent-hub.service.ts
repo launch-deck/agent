@@ -1,6 +1,7 @@
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { Observable, Subject, ReplaySubject, firstValueFrom } from "rxjs";
 import type { AgentData, AgentState, Command } from "@launch-deck/common";
+import { log, error } from 'electron-log';
 
 export enum ConnectionState {
     disconnected,
@@ -38,7 +39,7 @@ export class AgentHubService {
         this.connectionObservable.next(ConnectionState.connecting);
 
         const url = new URL(AgentHubService.HUB_NAME, serverAddress).href;
-        console.log(`Connecting to: ${url}`);
+        log(`Connecting to: ${url}`);
 
         this.connection = new HubConnectionBuilder()
             .withUrl(url)
@@ -76,10 +77,10 @@ export class AgentHubService {
             await this.connection.start();
             this.connectionSubject.next(this.connection);
             await this.invoke("Connect", agentCode);
-            console.log(`Connected with code: ${agentCode}`);
+            log(`Connected with code: ${agentCode}`);
             this.connectionObservable.next(ConnectionState.connected);
         } catch (e) {
-            console.log("Failed to connect to server", e);
+            log("Failed to connect to server", e);
             this.stopConnection();
             this.connectionObservable.next(ConnectionState.disconnected);
             throw e;
@@ -98,9 +99,9 @@ export class AgentHubService {
     public async sendData(data: AgentData): Promise<void> {
         try {
             await this.invoke("SendData", data);
-            console.log(`Data Sent`, data);
+            log(`Data Sent`, data);
         } catch (e) {
-            console.log(`Failed to send data`, data, e);
+            error(`Failed to send data`, data, e);
         }
     }
 
@@ -112,9 +113,9 @@ export class AgentHubService {
     public async sendState(state: AgentState): Promise<void> {
         try {
             await this.invoke("SendState", state);
-            console.log(`State Sent`, state);
+            log(`State Sent`, state);
         } catch (e) {
-            console.log(`Failed to send state`, state, e);
+            error(`Failed to send state`, state, e);
         }
     }
 
@@ -127,9 +128,9 @@ export class AgentHubService {
     public async sendTrigger(trigger: string): Promise<void> {
         try {
             await this.invoke("SendTrigger", trigger);
-            console.log(`Trigger Sent`, trigger);
+            log(`Trigger Sent`, trigger);
         } catch (e) {
-            console.log(`Failed to send trigger`, trigger, e);
+            error(`Failed to send trigger`, trigger, e);
         }
     }
 

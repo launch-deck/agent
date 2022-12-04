@@ -1,6 +1,7 @@
 import { workerData, parentPort } from 'worker_threads';
 import type { Plugin } from "@launch-deck/common";
 import { WorkerMessage } from './worker-message.interface';
+import { error } from 'electron-log';
 
 // Keep the thread alive
 const keepAlive = setInterval(() => { }, 60000);
@@ -28,7 +29,7 @@ class PluginWorker {
                 parentPort?.on("message", (message) => this.onMessage(message));
             })
             .catch((err) => {
-                console.error(err);
+                error(err);
                 this.exit();
             });
     }

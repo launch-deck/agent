@@ -4,6 +4,7 @@ import { join } from 'path';
 import type { Plugin } from "@launch-deck/common";
 import { PluginWorker } from "./plugin-worker.class";
 import { Subject } from "rxjs";
+import { log, error, warn } from 'electron-log';
 
 export class PluginService {
 
@@ -33,7 +34,7 @@ export class PluginService {
 
         for (let path of this.pluginPaths) {
             if (existsSync(path)) {
-                console.log(`Loading plugins from: ${path}`);
+                log(`Loading plugins from: ${path}`);
 
                 const plugins = readdirSync(path);
 
@@ -41,7 +42,7 @@ export class PluginService {
                     await this.loadPlugin(plugin, path);
                 }
             } else {
-                console.log(`Plugin dir not found: ${path}`);
+                log(`Plugin dir not found: ${path}`);
             }
         }
 
@@ -93,7 +94,7 @@ export class PluginService {
         const pluginPathPackageJson = join(pluginPath, 'package.json');
 
         if (!existsSync(pluginPathPackageJson)) {
-            console.warn(`Plugin package json ${pluginPathPackageJson} does not exist`);
+            warn(`Plugin package json ${pluginPathPackageJson} does not exist`);
             return;
         }
 
@@ -115,7 +116,7 @@ export class PluginService {
         try {
 
             if (this.plugins.find(plugin => plugin.ns === pluginInfo.name)) {
-                console.log(`Plugin already loaded: ${pluginInfo.name || pluginInfo.main}`)
+                log(`Plugin already loaded: ${pluginInfo.name || pluginInfo.main}`)
                 return;
             }
 
@@ -123,11 +124,11 @@ export class PluginService {
 
             await plugin.start();
 
-            console.log(`Plugin loaded: ${pluginInfo.name || pluginInfo.main}`)
+            log(`Plugin loaded: ${pluginInfo.name || pluginInfo.main}`)
             this.plugins.push(plugin);
 
         } catch (e) {
-            console.error(`Error loading plugin ${pluginInfo.main}`, e);
+            error(`Error loading plugin ${pluginInfo.main}`, e);
         }
     }
 }

@@ -1,5 +1,6 @@
 import type { Command } from "@launch-deck/common";
 import { PluginService } from "./plugin.service";
+import { log, error } from 'electron-log';
 
 export class CommandService {
 
@@ -24,7 +25,7 @@ export class CommandService {
                     commands = commands.concat(c);
                 })
                 .catch(e => {
-                    console.log(`Failed to get plugin commands: ${plugin.ns}`, e);
+                    error(`Failed to get plugin commands: ${plugin.ns}`, e);
                 })
             );
         }
@@ -55,10 +56,10 @@ export class CommandService {
 
         if (plugin) {
             try {
-                console.log(`On Command: ${plugin.ns} : ${command.type}`, command.data);
+                log(`On Command: ${plugin.ns} : ${command.type}`, command.data);
                 await plugin.handleCommand(command);
             } catch (e) {
-                console.log(`Failed to handle plugin command: ${plugin.ns} : ${command.type}`, e);
+                error(`Failed to handle plugin command: ${plugin.ns} : ${command.type}`, e);
             }
         }
     }

@@ -1,6 +1,7 @@
 import { Observable, ReplaySubject, Subject } from "rxjs";
 import type { AgentData } from "@launch-deck/common";
 import ElectronStore from 'electron-store';
+import { log } from 'electron-log';
 
 export class DataService {
 
@@ -24,7 +25,7 @@ export class DataService {
      */
     public loadData(): AgentData {
 
-        console.log("Loading data from storage");
+        log("Loading data from storage");
 
         let agentData = this.store.get(DataService.STORAGE_KEY) as AgentData;
 
@@ -43,7 +44,7 @@ export class DataService {
      * @param agentData the data to save
      */
     public saveData(agentData: AgentData): void {
-        console.log("Saving data to storage");
+        log("Saving data to storage");
 
         let saveData = {} as AgentData;
         saveData.serverAddress = agentData.serverAddress;

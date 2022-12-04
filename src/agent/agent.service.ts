@@ -7,6 +7,7 @@ import { PluginService } from "./plugin.service";
 import { SettingsService } from "./settings.service";
 import { StateService } from "./state.service";
 import { ActiveWindowService } from "./active-window.service";
+import { log } from 'electron-log';
 
 export class AgentService {
 
@@ -55,19 +56,19 @@ export class AgentService {
 
         // Whenever there is new data, save it
         this.client.data.subscribe(agentData => {
-            console.log("OnData");
+            log("OnData");
             this.dataService.saveData(agentData);
         });
 
         // Whenever there are commands, handle them
         this.client.commands.subscribe(async commands => {
-            console.log("OnCommands: " + commands.length);
+            log("OnCommands: " + commands.length);
             await this.commandService.handleCommands(commands);
         });
 
         // Whenever there are commands, handle them
         this.client.tileCommands.subscribe(async tileId => {
-            console.log("OnTileCommands: " + tileId);
+            log("OnTileCommands: " + tileId);
 
             var data: AgentData = await firstValueFrom(this.dataService.observeData());
             var commands = data.tiles.find(tile => tileId === tile.id)?.commands;
@@ -76,7 +77,7 @@ export class AgentService {
                 await this.commandService.handleCommands(commands);
             }
             else {
-                console.log("No Tile Commands Found: " + tileId);
+                log("No Tile Commands Found: " + tileId);
             }
         });
     }
@@ -112,13 +113,13 @@ export class AgentService {
 
             // Whenever the data changes, send it to the clients
             this.dataSubscription = this.dataObservable.subscribe(async agentData => {
-                console.log("Sending data");
+                log("Sending data");
                 await this.client.sendData(agentData);
             });
 
             // Whenever the state changes, send it to the clients
             this.stateSubscription = this.stateService.observeState().subscribe(async agentState => {
-                console.log("Sending state");
+                log("Sending state");
                 await this.client.sendState(agentState);
             });
 

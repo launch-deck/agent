@@ -1,4 +1,4 @@
-import { filter, firstValueFrom, map, Subject, Subscription } from 'rxjs';
+import { filter, firstValueFrom, Subject, Subscription } from 'rxjs';
 import { EventEmitter } from 'events';
 import { Worker } from 'worker_threads';
 import { WorkerMessage } from './worker-message.interface';

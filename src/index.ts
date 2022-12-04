@@ -1,5 +1,5 @@
 import * as path from "path";
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, session } from 'electron';
 import { ConnectionState } from './agent/agent-hub.service';
 import { AgentService } from './agent/agent.service';
 import { v4 } from "uuid";
@@ -26,6 +26,17 @@ const pluginSubscription = agentService.pluginStatus.subscribe(plugins => {
 agentService.init();
 
 const createWindow = (): void => {
+
+    // Add CSP headers
+    session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+        callback({
+            responseHeaders: {
+                ...details.responseHeaders,
+                'Content-Security-Policy': ['default-src \'self\' \'unsafe-inline\'']
+            }
+        })
+    });
+
     // Create the browser window.
     mainWindow = new BrowserWindow({
         height: 500,
@@ -40,7 +51,9 @@ const createWindow = (): void => {
     mainWindow.loadURL(path.join(__dirname, "app/index.html"));
 
     // Open the DevTools.
-    //mainWindow.webContents.openDevTools();
+    if (process.env.NODE_ENV === 'development') {
+        mainWindow.webContents.openDevTools({ mode: 'detach' });
+    }
 
     // When the main window opens, send the connectionState
     mainWindow.webContents.send('connection', connectionState);
@@ -89,6 +102,3 @@ app.on('activate', () => {
         createWindow();
     }
 });
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and import them here.

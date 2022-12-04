@@ -1,7 +1,7 @@
 {
     "name": "launch-deck-agent",
     "productName": "LaunchDeck Agent",
-    "version": "0.0.1-snapshot.2",
+    "version": "0.0.1-snapshot.3",
     "description": "Virtual application launcher, macro-pad and automation tool",
     "main": "dist/index.js",
     "scripts": {

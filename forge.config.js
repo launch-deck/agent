@@ -34,8 +34,8 @@ module.exports = {
             name: '@electron-forge/publisher-github',
             config: {
                 repository: {
-                    owner: 'nova706',
-                    name: 'launch-deck'
+                    owner: 'launch-deck',
+                    name: 'agent'
                 },
                 draft: true
             }

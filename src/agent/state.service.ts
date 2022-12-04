@@ -29,7 +29,7 @@ export class StateService {
                         if (plugin.ns) {
                             pluginState[plugin.ns] = state as { [key: string]: object; };
                         }
-                        return pluginState;
+                        return { pluginState, coreState: {} } as AgentState;
                     })
                 );
             });
@@ -37,22 +37,26 @@ export class StateService {
         const windowObservable = this.window.activeWindow.pipe(
             distinctUntilChanged(),
             map(application => {
-                let pluginState = {} as { [key: string]: { [key: string]: object } };
-                pluginState["LaunchDeck.Agent"] = { activeWindow: application as any };
-                return pluginState;
+                let coreState = {} as { [key: string]: object };
+                coreState = { activeWindow: application as any };
+                return { coreState, pluginState: {} } as AgentState;
             })
         )
 
-        merge(windowObservable, ...stateObservables).subscribe(pluginState => {
+        merge(windowObservable, ...stateObservables).subscribe(state => {
 
-            for (let ns in pluginState) {
+            for (let key in state.coreState) {
+                this.currentState.coreState[key] = state.coreState[key];
+            }
+
+            for (let ns in state.pluginState) {
 
                 if (!this.currentState.pluginState.hasOwnProperty(ns)) {
                     this.currentState.pluginState[ns] = {};
                 }
 
-                for (let key in pluginState[ns]) {
-                    this.currentState.pluginState[ns][key] = pluginState[ns][key];
+                for (let key in state.pluginState[ns]) {
+                    this.currentState.pluginState[ns][key] = state.pluginState[ns][key];
                 }
             }
 

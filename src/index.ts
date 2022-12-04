@@ -3,6 +3,10 @@ import { app, BrowserWindow, ipcMain, session } from 'electron';
 import { ConnectionState } from './agent/agent-hub.service';
 import { AgentService } from './agent/agent.service';
 import { v4 } from "uuid";
+import { log } from "electron-log";
+
+log('');
+log("------ Starting Agent ------");
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {

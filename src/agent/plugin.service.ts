@@ -4,7 +4,7 @@ import { join } from 'path';
 import type { Plugin } from "@launch-deck/common";
 import { PluginWorker } from "./plugin-worker.class";
 import { Subject } from "rxjs";
-import { log, error, warn } from 'electron-log';
+import { log, error } from 'electron-log';
 
 export class PluginService {
 
@@ -21,7 +21,7 @@ export class PluginService {
         ];
 
         if (process.env.NODE_ENV === 'development') {
-            paths.push(join(app.getAppPath(), "../plugins"));
+            paths.unshift(join(app.getAppPath(), "../plugins"));
         }
 
         return paths;
@@ -94,7 +94,6 @@ export class PluginService {
         const pluginPathPackageJson = join(pluginPath, 'package.json');
 
         if (!existsSync(pluginPathPackageJson)) {
-            warn(`Plugin package json ${pluginPathPackageJson} does not exist`);
             return;
         }
 
@@ -102,7 +101,7 @@ export class PluginService {
         pluginInfo = Object.assign(pluginInfo, {
             pluginPath,
             main: join(pluginPath, pluginInfo.main),
-        })
+        });
 
         await this.requirePlugin(pluginInfo);
     }
@@ -122,9 +121,10 @@ export class PluginService {
 
             const plugin: PluginWorker = new PluginWorker(pluginInfo);
 
+            log(`Plugin loaded: ${pluginInfo.name || pluginInfo.main}`)
+
             await plugin.start();
 
-            log(`Plugin loaded: ${pluginInfo.name || pluginInfo.main}`)
             this.plugins.push(plugin);
 
         } catch (e) {

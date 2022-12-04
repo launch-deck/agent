@@ -4,6 +4,7 @@ import { Worker } from 'worker_threads';
 import { WorkerMessage } from './worker-message.interface';
 import type { Command, Plugin } from "@launch-deck/common";
 import { log, error } from 'electron-log';
+import { join } from "path";
 
 export class PluginWorker implements Plugin {
 
@@ -26,8 +27,7 @@ export class PluginWorker implements Plugin {
         if (this.started) {
             return;
         }
-        log(`Plugin started: ${this.ns}`);
-        this.worker = new Worker('./dist/agent/plugin-worker-thread.js', { workerData: this.pluginInfo });
+        this.worker = new Worker(join(__dirname, 'plugin-worker-thread.js'), { workerData: this.pluginInfo });
         this.worker.on('message', (message) => this.messages.next(message));
         this.worker.on('error', (e) => error(`${this.ns} Worker error: ${e}`));
         this.worker.on('exit', (code) => log(`${this.ns} Worker stopped with exit code ${code}`));
@@ -45,18 +45,21 @@ export class PluginWorker implements Plugin {
         });
 
         this.started = true;
+
+        log(`Plugin started: ${this.ns}`);
     }
 
     stop(): void {
         if (!this.started) {
             return;
         }
-        log(`Plugin stopped: ${this.ns}`);
         this.sub?.unsubscribe();
         this.sendMessage({ action: 'exit' });
         this.worker?.removeAllListeners();
         this.worker = undefined;
         this.started = false;
+
+        log(`Plugin stopped: ${this.ns}`);
     }
 
     async handleCommand(command: Command): Promise<void> {

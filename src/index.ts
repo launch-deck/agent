@@ -9,6 +9,11 @@ if (require('electron-squirrel-startup')) {
     app.quit();
 }
 
+// Handle auto-updates
+if (process.env.NODE_ENV !== 'development') {
+    require('update-electron-app')()
+}
+
 let mainWindow: BrowserWindow | null;
 let connectionState: ConnectionState = ConnectionState.disconnected;
 let pluginsStatus: { ns: string, started: boolean }[] = [];

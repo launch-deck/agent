@@ -22,7 +22,7 @@ if (process.env.NODE_ENV !== 'development') {
 
 let mainWindow: BrowserWindow | null;
 let connectionState: ConnectionState = ConnectionState.disconnected;
-let pluginsStatus: { ns: string, started: boolean }[] = [];
+let pluginsStatus: { ns: string, started: boolean, core: boolean }[] = [];
 
 const agentService = new AgentService();
 
@@ -31,7 +31,8 @@ const connectionSubscription = agentService.connectionObservable.subscribe((stat
     mainWindow?.webContents.send('connection', connectionState);
 });
 const pluginSubscription = agentService.pluginStatus.subscribe(plugins => {
-    pluginsStatus = plugins.map(plugin => ({ ns: plugin.ns, started: plugin.started }));
+    pluginsStatus = plugins.map(plugin => ({ ns: plugin.ns, started: plugin.started, core: false }));
+    pluginsStatus = agentService.getCorePlugins().map(plugin => ({ ns: plugin.ns || "", started: true, core: true })).concat(pluginsStatus);
     mainWindow?.webContents.send('pluginStatus', pluginsStatus);
 });
 agentService.init();

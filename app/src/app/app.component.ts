@@ -1,5 +1,11 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 
+interface LoadedPlugin {
+    ns: string,
+    started: boolean,
+    core: boolean
+}
+
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
@@ -10,7 +16,7 @@ export class AppComponent implements OnInit {
     serverAddress: string = "";
     agentCode: string = "";
     connectionState: number = 0;
-    plugins: { ns: string, started: boolean }[] = [];
+    plugins: LoadedPlugin[] = [];
 
     private api: any;
 
@@ -30,11 +36,11 @@ export class AppComponent implements OnInit {
             this.connectionState = state;
             this.cdr.detectChanges();
         });
-        this.api.onPluginStatus((_: any, plugins: { ns: string, started: boolean }[]) => {
+        this.api.onPluginStatus((_: any, plugins: LoadedPlugin[]) => {
             this.plugins = plugins;
             this.cdr.detectChanges();
         });
-        this.api.getPluginStatus().then((plugins: { ns: string, started: boolean }[]) => {
+        this.api.getPluginStatus().then((plugins: LoadedPlugin[]) => {
             this.plugins = plugins;
             this.cdr.detectChanges();
         });

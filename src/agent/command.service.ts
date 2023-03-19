@@ -1,6 +1,8 @@
 import type { Command } from "@launch-deck/common";
 import { PluginService } from "./plugin.service";
 import { log, error } from 'electron-log';
+import { async } from "./extensions";
+import { firstValueFrom } from "rxjs";
 
 export class CommandService {
 
@@ -16,10 +18,12 @@ export class CommandService {
         let commands: Command[] = [];
         const promises: Promise<any>[] = [];
 
+        await firstValueFrom(this.pluginService.pluginsLoaded);
+
         const plugins = this.pluginService.getPlugins();
 
         for (let plugin of plugins) {
-            promises.push(plugin.getCommands()
+            promises.push(async(plugin.getCommands(), 2000)
                 .then(c => {
                     c.forEach(command => command.class = plugin.ns);
                     commands = commands.concat(c);

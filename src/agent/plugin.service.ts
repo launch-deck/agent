@@ -3,14 +3,25 @@ import { existsSync, readdirSync, readFileSync } from "original-fs";
 import { join } from 'path';
 import type { Plugin } from "@launch-deck/common";
 import { PluginWorker } from "./plugin-worker.class";
-import { Subject } from "rxjs";
+import { ReplaySubject, Subject } from "rxjs";
 import { log, error } from 'electron-log';
+import delay from "../plugins/delay";
+import http from "../plugins/http";
+import keyboard from "../plugins/keyboard";
+import processPlugin from "../plugins/process";
 
 export class PluginService {
 
     private plugins: PluginWorker[] = [];
+    private corePlugins: Plugin[] = [
+        delay,
+        http,
+        keyboard,
+        processPlugin
+    ];
 
     pluginStatus: Subject<PluginWorker[]> = new Subject();
+    pluginsLoaded: Subject<boolean> = new ReplaySubject(1);
 
     /**
      * Gets the paths to look for plugins
@@ -47,15 +58,16 @@ export class PluginService {
         }
 
         this.pluginStatus.next(this.plugins);
+        this.pluginsLoaded.next(true);
     }
 
     public async startPlugin(ns: string) {
-        await this.getPlugin(ns)?.start();
+        await this.getExternalPlugin(ns)?.start();
         this.pluginStatus.next(this.plugins);
     }
 
     public stopPlugin(ns: string) {
-        this.getPlugin(ns)?.stop();
+        this.getExternalPlugin(ns)?.stop();
         this.pluginStatus.next(this.plugins);
     }
 
@@ -65,13 +77,12 @@ export class PluginService {
     }
 
     /**
-     * Gets a plugin by its namespace
+     * Gets the core plugins
      * 
-     * @param ns the plugin namespace
-     * @returns the plugin or undefined
+     * @returns the list of core plugins
      */
-    public getPlugin(ns?: string): PluginWorker | undefined {
-        return this.plugins.find(plugin => plugin.ns === ns);
+    public getCorePlugins(): Plugin[] {
+        return this.corePlugins.slice(0);
     }
 
     /**
@@ -80,7 +91,28 @@ export class PluginService {
      * @returns loaded plugins
      */
     public getPlugins(): Plugin[] {
-        return this.plugins.slice(0);
+        return this.getCorePlugins().concat(this.plugins.slice(0));
+    }
+
+    /**
+     * Gets a plugin by its namespace. First looks for core plugins
+     * 
+     * @param ns the plugin namespace
+     * @returns the plugin or undefined
+     */
+    public getPlugin(ns?: string): Plugin | undefined {
+        const core = this.corePlugins.find(plugin => plugin.ns === ns);
+        return core ?? this.plugins.find(plugin => plugin.ns === ns);
+    }
+
+    /**
+     * Gets a plugin by its namespace
+     * 
+     * @param ns the plugin namespace
+     * @returns the plugin or undefined
+     */
+    private getExternalPlugin(ns?: string): PluginWorker | undefined {
+        return this.plugins.find(plugin => plugin.ns === ns);
     }
 
     /**
@@ -98,6 +130,11 @@ export class PluginService {
         }
 
         let pluginInfo = JSON.parse(readFileSync(pluginPathPackageJson, "utf8"));
+
+        if (!pluginInfo.main) {
+            return;
+        }
+
         pluginInfo = Object.assign(pluginInfo, {
             pluginPath,
             main: join(pluginPath, pluginInfo.main),
@@ -114,7 +151,9 @@ export class PluginService {
     private async requirePlugin(pluginInfo: any): Promise<void> {
         try {
 
-            if (this.plugins.find(plugin => plugin.ns === pluginInfo.name)) {
+            const plugins = this.getPlugins();
+
+            if (plugins.find(plugin => plugin.ns === pluginInfo.name)) {
                 log(`Plugin already loaded: ${pluginInfo.name || pluginInfo.main}`)
                 return;
             }

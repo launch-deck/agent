@@ -14,7 +14,7 @@ export class StateService {
     constructor(private pluginService: PluginService, private window: ActiveWindowService) {
 
         const stateObservables = this.pluginService.getPlugins()
-            .filter(plugin => plugin.ns && typeof plugin.events)
+            .filter(plugin => plugin.ns && plugin.events)
             .map(plugin => {
 
                 if (!plugin.ns || !plugin.events) {

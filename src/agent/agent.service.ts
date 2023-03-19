@@ -1,5 +1,5 @@
-import { firstValueFrom, map, Observable, Subscription, switchAll } from "rxjs";
-import type { AgentData } from "@launch-deck/common";
+import { concatMap, firstValueFrom, map, Observable, of, Subscription, switchAll } from "rxjs";
+import type { AgentData, Plugin } from "@launch-deck/common";
 import { AgentHubService } from "./agent-hub.service";
 import { CommandService } from "./command.service";
 import { DataService } from "./data.service";
@@ -42,16 +42,22 @@ export class AgentService {
 
         // Set up the data observable to combine data from plugins
         this.dataObservable = this.dataService.observeData().pipe(
-            map(async agentData => {
-
+            map(agentData => {
                 // Add plugin settings into the data
                 agentData.settings = this.settingsService.getAgentDataSettings(agentData);
-
-                // Add plugin commands to the data
-                agentData.commands = await this.commandService.getCommands();
                 return agentData;
             }),
-            switchAll()
+            concatMap((agentData: AgentData, index: number) => index === 0
+                ? of(agentData).pipe(
+                    map(async (agentData) => {
+                        // Add plugin commands to the data only the first time the data is loaded
+                        agentData.commands = await this.commandService.getCommands();
+                        return agentData;
+                    }),
+                    switchAll()
+                )
+                : of(agentData)
+            )
         );
 
         // Whenever there is new data, save it
@@ -143,6 +149,10 @@ export class AgentService {
 
     public stopAllPlugins(): void {
         this.pluginService.stopAllPlugins();
+    }
+
+    public getCorePlugins(): Plugin[] {
+        return this.pluginService.getCorePlugins();
     }
 
     private unsubscribe(): void {

@@ -27,7 +27,14 @@ export class PluginWorker implements Plugin {
         if (this.started) {
             return;
         }
-        this.worker = new Worker(join(__dirname, 'plugin-worker-thread.js'), { workerData: this.pluginInfo });
+
+        try {
+            this.worker = new Worker(join(__dirname, 'plugin-worker-thread.js'), { workerData: this.pluginInfo });
+        } catch (e) {
+            error(`Failed to start plugin worker: ${this.ns}`, e);
+            return;
+        }
+
         this.worker.on('message', (message) => this.messages.next(message));
         this.worker.on('error', (e) => error(`${this.ns} Worker error: ${e}`));
         this.worker.on('exit', (code) => log(`${this.ns} Worker stopped with exit code ${code}`));

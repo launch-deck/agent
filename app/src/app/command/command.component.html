@@ -1,0 +1,53 @@
+<ng-content></ng-content>
+
+{{command.name}}
+
+<button type="button" class="remove" mat-icon-button (click)="remove.emit()" aria-label="Remove" title="Remove">
+    <mat-icon>delete</mat-icon>
+</button>
+<button type="button" class="add" mat-icon-button (click)="add.emit()" aria-label="Add" title="Add">
+    <mat-icon>add</mat-icon>
+</button>
+
+<ng-container *ngFor="let commandInput of commandInputs | keyvalue: originalOrder" [ngSwitch]="commandInput.value.type">
+
+    <mat-form-field appearance="fill" *ngSwitchCase="'select'">
+        <mat-label>{{commandInput.value.name}}</mat-label>
+        <mat-select [value]="getValues(commandInput.key)" (selectionChange)="setValue($event.value, commandInput.key)" [multiple]="!!commandInput.value.multiple">
+            <mat-option *ngFor="let option of commandInput.value.selectionOptions" [value]="option.data">{{option.name}}</mat-option>
+        </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" *ngSwitchCase="'suggest'">
+        <mat-label>{{commandInput.value.name}}</mat-label>
+
+        <input type="text"
+               matInput
+               [(ngModel)]="commandData[commandInput.key]"
+               [matAutocomplete]="auto">
+        <mat-autocomplete #auto="matAutocomplete">
+            <mat-option *ngFor="let option of commandInput.value.selectionOptions" [value]="option.data">
+                {{option.name}}
+            </mat-option>
+        </mat-autocomplete>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" *ngSwitchCase="'text'">
+        <mat-label>{{commandInput.value.name}}</mat-label>
+        <textarea matInput rows="6" [(ngModel)]="commandData[commandInput.key]" (changed)="changed.emit()"
+            (mousedown)="$event.stopPropagation()"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" *ngSwitchCase="'number'">
+        <mat-label>{{commandInput.value.name}}</mat-label>
+        <input matInput type="text" pattern="-?[0-9.]+" [(ngModel)]="commandData[commandInput.key]" (changed)="changed.emit()"
+            (mousedown)="$event.stopPropagation()" />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" *ngSwitchCase="'value'">
+        <mat-label>{{commandInput.value.name}}</mat-label>
+        <input matInput type="text" [(ngModel)]="commandData[commandInput.key]" (changed)="changed.emit()"
+            (mousedown)="$event.stopPropagation()" />
+    </mat-form-field>
+
+</ng-container>

@@ -1,0 +1,2 @@
+<app-tile-grid (select)="selectedTile = $event" [selectedTile]="selectedTile"></app-tile-grid>
+<app-tile-edit *ngIf="selectedTile" [tile]="selectedTile" (save)="save()" (cancel)="cancel()" (remove)="remove()"></app-tile-edit>

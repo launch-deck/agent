@@ -1,0 +1,14 @@
+.background-image {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.image-preview {
+    height: 200px;
+    min-width: 250px;
+    max-width: 100%;
+    background-size: contain;
+    background-repeat: no-repeat;
+    cursor: pointer;
+}

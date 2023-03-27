@@ -1,9 +1,11 @@
 import * as path from "path";
-import { app, BrowserWindow, ipcMain, session } from 'electron';
+import { app, BrowserWindow, ipcMain, session, shell } from 'electron';
 import { ConnectionState } from './agent/agent-hub.service';
 import { AgentService } from './agent/agent.service';
 import { v4 } from "uuid";
 import { log } from "electron-log";
+import { AgentData } from "@launch-deck/common";
+import { firstValueFrom } from "rxjs";
 
 log('');
 log("------ Starting Agent ------");
@@ -44,19 +46,30 @@ const createWindow = (): void => {
         callback({
             responseHeaders: {
                 ...details.responseHeaders,
-                'Content-Security-Policy': ['default-src \'self\' \'unsafe-inline\'']
+                'Content-Security-Policy': ['default-src \'self\' \'unsafe-inline\' https://*.googleapis.com; img-src * data:; font-src https://fonts.gstatic.com; connect-src data:']
             }
         })
     });
 
     // Create the browser window.
     mainWindow = new BrowserWindow({
-        height: 500,
-        width: 400,
+        height: 950,
+        width: 950,
         autoHideMenuBar: true,
         webPreferences: {
             preload: path.join(__dirname, "preload.js")
         },
+    });
+
+    mainWindow.webContents.on('new-window', function (e, url) {
+        // make sure local urls stay in electron perimeter
+        if ('file://' === url.substring(0, 'file://'.length)) {
+            return;
+        }
+
+        // and open every other protocols on the browser      
+        e.preventDefault();
+        shell.openExternal(url);
     });
 
     // and load the index.html of the app.
@@ -64,7 +77,7 @@ const createWindow = (): void => {
 
     // Open the DevTools.
     if (process.env.NODE_ENV === 'development') {
-        mainWindow.webContents.openDevTools({ mode: 'detach' });
+        mainWindow.webContents.openDevTools();
     }
 
     // When the main window opens, send the connectionState
@@ -88,6 +101,8 @@ const createWindow = (): void => {
     ipcMain.handle('getPluginStatus', () => pluginsStatus);
     ipcMain.handle('startPlugin', (_, ns: string) => agentService.startPlugin(ns));
     ipcMain.handle('stopPlugin', (_, ns: string) => agentService.stopPlugin(ns));
+    ipcMain.handle('getAgentData', async () => await firstValueFrom(agentService.dataObservable));
+    ipcMain.handle('updateData', (_, agentData: AgentData) => agentService.updateData(agentData));
 };
 
 // This method will be called when Electron has finished

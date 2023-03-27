@@ -1,0 +1,3 @@
+<div *ngFor="let plugin of plugins | async">
+    <mat-slide-toggle color="primary" [disabled]="plugin.core" [checked]="plugin.started" (change)="updatePlugin(plugin)">{{plugin.ns}}</mat-slide-toggle>
+</div>

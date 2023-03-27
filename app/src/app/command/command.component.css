@@ -1,0 +1,127 @@
+:host {
+    position: relative;
+    display: table;
+    background: var(--color2);
+    color: #fff;
+    margin: 4px 0;
+    padding: 12px 40px 8px 35px;
+    border-radius: 3px;
+    min-height: 30px;
+}
+
+:host:before {
+    content: '';
+    /* Required to display content */
+    position: absolute;
+    /* Sets the position absolute to the top div */
+    top: 0;
+    left: 10px;
+    width: 0;
+    z-index: 1;
+    height: 0;
+    border-top: solid 4px #333;
+    /* Creates the notch */
+    border-left: solid 8px transparent;
+    /* Creates triangle effect */
+    border-right: solid 8px transparent;
+    /* Creates triangle effect */
+}
+
+:host:after {
+    content: '';
+    /* Required to display content */
+    position: absolute;
+    /* Sets the position absolute to the top div */
+    bottom: -4px;
+    left: 10px;
+    width: 0;
+    z-index: 2;
+    height: 0;
+    border-top: solid 4px #0288D1;
+    /* Creates the notch */
+    border-left: solid 8px transparent;
+    /* Creates triangle effect */
+    border-right: solid 8px transparent;
+    /* Creates triangle effect */
+}
+
+:host .remove,
+:host .add {
+    font-family: monospace;
+    position: absolute;
+    right: 0;
+    top: 0;
+    cursor: pointer;
+}
+
+:host mat-form-field {
+    display: block;
+    max-width: 150px;
+    margin-bottom: -10px;
+}
+
+:host mat-form-field:first-of-type {
+    margin-top: 10px;
+}
+
+:host.cdk-drag-preview .remove,
+:host.cdk-drag-preview .add,
+:host.cdk-drag-preview mat-form-field {
+    display: none;
+}
+
+:host.color-1 {
+    background: var(--color1);
+}
+
+:host.color-1:after {
+    border-top-color: var(--color1);
+}
+
+:host.color-2 {
+    background: var(--color2);
+}
+
+:host.color-2:after {
+    border-top-color: var(--color2);
+}
+
+:host.color-3 {
+    background: var(--color3);
+}
+
+:host.color-3:after {
+    border-top-color: var(--color3);
+}
+
+:host.color-4 {
+    background: var(--color4);
+}
+
+:host.color-4:after {
+    border-top-color: var(--color4);
+}
+
+:host.color-5 {
+    background: var(--color5);
+}
+
+:host.color-5:after {
+    border-top-color: var(--color5);
+}
+
+:host.color-6 {
+    background: var(--color6);
+}
+
+:host.color-6:after {
+    border-top-color: var(--color6);
+}
+
+:host.color-7 {
+    background: var(--color7);
+}
+
+:host.color-7:after {
+    border-top-color: var(--color7);
+}

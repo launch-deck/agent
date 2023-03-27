@@ -1,4 +1,4 @@
-import { concatMap, firstValueFrom, map, Observable, of, Subscription, switchAll } from "rxjs";
+import { concatMap, firstValueFrom, map, Observable, of, shareReplay, Subscription, switchAll } from "rxjs";
 import type { AgentData, Plugin } from "@launch-deck/common";
 import { AgentHubService } from "./agent-hub.service";
 import { CommandService } from "./command.service";
@@ -19,7 +19,7 @@ export class AgentService {
     private readonly stateService: StateService;
     private readonly window: ActiveWindowService;
 
-    private readonly dataObservable: Observable<AgentData>;
+    readonly dataObservable: Observable<AgentData>;
     private dataSubscription?: Subscription;
     private stateSubscription?: Subscription;
 
@@ -57,7 +57,8 @@ export class AgentService {
                     switchAll()
                 )
                 : of(agentData)
-            )
+            ),
+            shareReplay(1)
         );
 
         // Whenever there is new data, save it
@@ -153,6 +154,10 @@ export class AgentService {
 
     public getCorePlugins(): Plugin[] {
         return this.pluginService.getCorePlugins();
+    }
+
+    public updateData(agentData: AgentData): void {
+        this.dataService.saveData(agentData);
     }
 
     private unsubscribe(): void {

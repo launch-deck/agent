@@ -1,0 +1,85 @@
+<div class="tile-container root"
+     #rootTiles
+     (swiperight)="previousRootPage()"
+     (swipeleft)="nextRootPage()">
+
+    <div class="tiles" *ngIf="tiles | async as tileList" [@listAnimation]="rootChanged">
+        <div *ngFor="let tile of tileList; index as i" 
+             class="tile" 
+             [class.selected]="tile.id === selectedTile?.id"
+             [ngStyle]="{'background-color': tile.color}"
+             matRipple 
+             (click)="selectTile(tile)">
+            <mat-icon *ngIf="tile.icon">{{tile.icon}}</mat-icon>
+            <span class="name">{{tile.name}}</span>
+            
+            <div class="sorting" *ngIf="tile.id === selectedTile?.id">
+                <button type="button" *ngIf="i > 0 || showRootPreviousPage" class="move-back" mat-icon-button (click)="moveTileBack(tile, tileList, i)">
+                    <mat-icon>chevron_left</mat-icon>
+                </button>
+                <button type="button" *ngIf="i < tileList.length - 1 || showRootNextPage" class="move-next" mat-icon-button (click)="moveTileNext(tile, tileList, i)">
+                    <mat-icon>chevron_right</mat-icon>
+                </button>
+            </div>
+        </div>
+    
+        <div *ngIf="showRootAdd" class="tile" matRipple (click)="addTile()">
+            <mat-icon>add</mat-icon>
+        </div>
+    </div>
+
+    <div class="previous" [class.show]="showRootPreviousPage">
+        <button type="button" mat-mini-fab (click)="previousRootPage()">
+            <mat-icon>chevron_left</mat-icon>
+        </button>
+    </div>
+    <div class="next" [class.show]="showRootNextPage">
+        <button type="button" mat-mini-fab (click)="nextRootPage()">
+            <mat-icon>chevron_right</mat-icon>
+        </button>
+    </div>
+
+</div>
+
+<div class="tile-container children"
+     [class.has-children]="hasChildren" 
+     #childTiles
+     (swiperight)="previousChildPage()"
+     (swipeleft)="nextChildPage()">
+    
+    <div class="tiles" *ngIf="children | async as tileList" [@listAnimation]="childChanged">
+        <div *ngFor="let tile of tileList; index as i" 
+             class="tile" 
+             [ngStyle]="{'background-color': tile.color}"
+             matRipple 
+             (click)="selectTile(tile)">
+            <mat-icon *ngIf="tile.icon">{{tile.icon}}</mat-icon>
+            <span class="name">{{tile.name}}</span>
+
+            <div class="sorting" *ngIf="tile.id === selectedTile?.id">
+                <button type="button" *ngIf="i > 0 || showChildPreviousPage" class="move-back" mat-icon-button (click)="moveTileBack(tile, tileList, i)">
+                    <mat-icon>chevron_left</mat-icon>
+                </button>
+                <button type="button" *ngIf="i < tileList.length - 1 || showChildNextPage" class="move-next" mat-icon-button (click)="moveTileNext(tile, tileList, i)">
+                    <mat-icon>chevron_right</mat-icon>
+                </button>
+            </div>
+        </div>
+
+        <div *ngIf="showChildAdd" class="tile" matRipple (click)="addTile(selectedTile?.id)">
+            <mat-icon>add</mat-icon>
+        </div>
+    </div>
+
+    <div class="previous" [class.show]="showChildPreviousPage">
+        <button type="button" mat-mini-fab (click)="previousChildPage()">
+            <mat-icon>chevron_left</mat-icon>
+        </button>
+    </div>
+    <div class="next" [class.show]="showChildNextPage">
+        <button type="button" mat-mini-fab (click)="nextChildPage()">
+            <mat-icon>chevron_right</mat-icon>
+        </button>
+    </div>
+
+</div>

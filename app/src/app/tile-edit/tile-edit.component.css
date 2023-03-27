@@ -1,0 +1,87 @@
+form {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    height: 100%;
+}
+
+.mat-dialog-actions {
+    justify-content: end;
+}
+
+.mat-dialog-content {
+    display: grid;
+    grid-template-rows: auto auto 1fr;
+    height: 100%;
+    max-height: 100%;
+}
+
+.form {
+    display: flex;
+    gap: 10px;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+::ng-deep .form .icon .mat-form-field-infix {
+    width: 130px;
+}
+
+.properties {
+    display: flex;
+    flex-basis: 0;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.command-container {
+    display: flex;
+    flex-wrap: wrap;
+    flex-basis: 0;
+    gap: 10px;
+    justify-content: space-around;
+}
+
+.commands {
+    position: relative;
+    max-height: 100%;
+    padding-bottom: 20px;
+}
+
+.command-list {
+    max-height: 100%;
+    min-height: 300px;
+}
+
+.command-list ::ng-deep app-command .remove,
+.command-list ::ng-deep app-command mat-form-field {
+    display: none !important;
+}
+
+.commands ::ng-deep app-command .add {
+    display: none !important;
+}
+
+::ng-deep app-command.cdk-drag-preview {
+    height: 30px !important;
+}
+
+.cdk-drag-handle {
+    position: absolute;
+    left: 5px;
+    top: 9px;
+    cursor: move;
+}
+
+mat-panel-title mat-icon {
+    margin-right: 10px;
+}
+
+::ng-deep .mat-autocomplete-panel.process-menu .mat-option {
+    white-space: inherit;
+    line-height: 20px;
+    height: auto;
+    padding: 8px 16px;
+    line-break: anywhere;
+}

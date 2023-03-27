@@ -1,0 +1,102 @@
+<form (submit)="save.emit()">    
+    <h1>
+        {{tile.name || "New Tile"}}
+        <button style="float: right" 
+                type="button" 
+                mat-icon-button 
+                #tooltip="matTooltip"
+                matTooltip="Copied to clipboard"
+                [matTooltipDisabled]="true"
+                (click)="copyUrlToClipboard()" 
+                *ngIf="tile?.id && tile?.id != '0'">
+            <mat-icon>app_shortcut</mat-icon>
+        </button>
+    </h1>
+    
+    <div class="content">
+
+        <div class="form">
+            <div class="properties">
+                <mat-form-field>
+                    <mat-label>Tile Name</mat-label>
+                    <input matInput type="text" name="tileName" [(ngModel)]="tile.name" maxlength="20" [required]="true" cdkFocusInitial/>
+                </mat-form-field>
+        
+                <mat-form-field class="icon">
+                    <mat-label>Icon</mat-label>
+                    <input matInput type="text" name="tileIcon" [(ngModel)]="tile.icon" autocapitalize="none"/>
+
+                    <a href="https://fonts.google.com/icons" target="_blank" matPrefix mat-icon-button aria-label="Search" (click)="$event.stopPropagation()">
+                        <mat-icon>search</mat-icon>
+                    </a>
+                    <span matSuffix>
+                        <input matInput type="color" name="tileColor" [(ngModel)]="tile.color" style="width: 27px;" (click)="$event.stopPropagation()"/>
+                        <button type="button" *ngIf="tile.color" mat-icon-button aria-label="Clear" (click)="tile.color=undefined; $event.stopPropagation()">
+                            <mat-icon>close</mat-icon>
+                        </button>
+                    </span>
+                </mat-form-field>
+        
+                <mat-form-field *ngIf="!tile.parentId">
+                    <mat-label>Process</mat-label>
+
+                    <input type="text"
+                           placeholder="Process Name"
+                           matInput
+                           name="processName"
+                           [(ngModel)]="tile.processName">
+                </mat-form-field>
+            </div>
+    
+            <div class="tile" [ngStyle]="{'background-color': tile.color}" matRipple>
+                <mat-icon *ngIf="tile.icon">{{tile.icon}}</mat-icon>
+                <span class="name">{{tile.name}}</span>
+            </div>
+        </div>
+
+        <mat-label>Commands</mat-label>
+
+        <div class="command-container">
+
+            <div class="commands" 
+                #commandList="cdkDropList" 
+                cdkDropList 
+                (cdkDropListDropped)="drop($event)"
+                [cdkDropListData]="tile.commands">
+
+                <p *ngIf="tile.commands?.length === 0">Drag commands here</p>
+
+                <app-command cdkDrag
+                             *ngFor="let command of tile.commands"
+                             [command]="command"
+                             [commandInputs]="commandInputsMap[(command.class || '') + command.type]"
+                             [color]="colorMap[command.class || '']"
+                             (remove)="removeCommand(command)">
+                    <mat-icon cdkDragHandle>drag_indicator</mat-icon>
+                </app-command>
+            </div>
+
+            <div class="command-list" *ngIf="commands | async as commandItems">
+
+                <div cdkDropList cdkDropListSortingDisabled (cdkDropListDropped)="drop($event)"
+                     [cdkDropListConnectedTo]="[commandList]" [cdkDropListData]="commandItems">
+                    <app-command cdkDrag
+                                 *ngFor="let command of commandItems"
+                                 [command]="command"
+                                 [color]="colorMap[command.class || '']"
+                                 (add)="addCommand(command)">
+                        <mat-icon cdkDragHandle>drag_indicator</mat-icon>
+                    </app-command>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <div>
+        <button type="button" mat-button (click)="cancel.emit()">Cancel</button>
+        <button type="button" *ngIf="tile.id !== '0'" mat-button color="accent" (click)="remove.emit()">Remove</button>
+        <button type="submit" mat-flat-button color="primary">Save</button>
+    </div>
+</form>

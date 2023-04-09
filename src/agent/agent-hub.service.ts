@@ -1,7 +1,8 @@
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { Observable, Subject, ReplaySubject, firstValueFrom } from "rxjs";
-import type { AgentData, AgentState, Command } from "@launch-deck/common";
 import { log, error } from 'electron-log';
+import ws from 'ws';
+import { ClientData } from './client-data.interface';
 
 export enum ConnectionState {
     disconnected,
@@ -15,18 +16,7 @@ export class AgentHubService {
 
     private connection: HubConnection | null = null;
     private connectionSubject: Subject<HubConnection> = new ReplaySubject(1);
-
-    private dataSubject: Subject<AgentData> = new Subject<AgentData>();
-    private commandsSubject: Subject<Command[]> = new Subject<Command[]>();
     private tileCommandSubject: Subject<string> = new Subject<string>();
-
-    public get data(): Observable<AgentData> {
-        return this.dataSubject;
-    }
-
-    public get commands(): Observable<Command[]> {
-        return this.commandsSubject;
-    }
 
     public get tileCommands(): Observable<string> {
         return this.tileCommandSubject;
@@ -49,18 +39,21 @@ export class AgentHubService {
             .build();
 
         this.connection.onclose(() => {
+            log(`Connection Closed`);
             this.connectionSubject = new ReplaySubject(1);
             this.connectionObservable.next(ConnectionState.disconnected);
         });
 
         // Clear the connection subject until the connection is restarted to delay invocation until connection is established
         this.connection.onreconnecting(() => {
+            log(`Reconnecting`);
             this.connectionSubject = new ReplaySubject(1);
             this.connectionObservable.next(ConnectionState.connecting);
         });
 
         // On reconnect, use the new connection for invocation. Request data in case of changes while disconnected
         this.connection.onreconnected(async () => {
+            log(`Reconnected`);
             if (this.connection) {
                 this.connectionSubject.next(this.connection);
             }
@@ -69,12 +62,11 @@ export class AgentHubService {
         });
 
         // Watch for server events
-        this.connection.on('Data', (data: AgentData) => this.dataSubject.next(data));
-        this.connection.on('Commands', (commands: Command[]) => this.commandsSubject.next(commands));
         this.connection.on('TileCommands', (tileId: string) => this.tileCommandSubject.next(tileId));
 
         try {
             await this.connection.start();
+            log(`Connection Started`);
             this.connectionSubject.next(this.connection);
             await this.invoke("Connect", agentCode);
             log(`Connected with code: ${agentCode}`);
@@ -96,41 +88,12 @@ export class AgentHubService {
      * 
      * @param data the data
      */
-    public async sendData(data: AgentData): Promise<void> {
+    public async sendData(data: ClientData): Promise<void> {
         try {
             await this.invoke("SendData", data);
             log(`Data Sent`, data);
         } catch (e) {
             error(`Failed to send data`, data, e);
-        }
-    }
-
-    /**
-     * Sends the state to clients
-     * 
-     * @param state the state
-     */
-    public async sendState(state: AgentState): Promise<void> {
-        try {
-            await this.invoke("SendState", state);
-            log(`State Sent`, state);
-        } catch (e) {
-            error(`Failed to send state`, state, e);
-        }
-    }
-
-    /**
-     * Sends triggers to the clients
-     * TODO: This should be driven by plugins
-     * 
-     * @param trigger the trigger
-     */
-    public async sendTrigger(trigger: string): Promise<void> {
-        try {
-            await this.invoke("SendTrigger", trigger);
-            log(`Trigger Sent`, trigger);
-        } catch (e) {
-            error(`Failed to send trigger`, trigger, e);
         }
     }
 

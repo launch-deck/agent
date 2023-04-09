@@ -6,14 +6,11 @@
         "skipLibCheck": true,
         "esModuleInterop": true,
         "noImplicitAny": true,
-        "noImplicitThis": true,
-        "strictNullChecks": true,
         "sourceMap": true,
         "baseUrl": ".",
-        "outDir": "dist",
+        "outDir": "worker-thread",
         "moduleResolution": "node",
         "resolveJsonModule": true,
-        "jsx": "react-jsx",
         "paths": {
             "*": [
                 "node_modules/*"
@@ -21,9 +18,6 @@
         },
     },
     "include": [
-        "src/**/*"
-    ],
-    "exclude": [
         "src/agent/plugin-worker-thread.ts"
     ]
 }

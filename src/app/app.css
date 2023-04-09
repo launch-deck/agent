@@ -1,0 +1,408 @@
+/* You can add global styles to this file, and also import other style files */
+
+* {
+    box-sizing: border-box;
+}
+
+*[hidden] {
+    display: none !important;
+}
+
+body {
+    --color1: #FF4081;
+    --color2: #3F51B5;
+    --color3: #4BC6B9;
+    --color4: #FAC748;
+    --color5: #8D37F0;
+    --color6: #D16DBD;
+    --color7: #729690;
+    --background-color: #333;
+}
+
+html,
+body {
+    height: 100%;
+    background-color: var(--background-color) !important;
+    color: #fff;
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+}
+
+html {
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+#app {
+    height: 100%;
+}
+
+.color1 {
+    color: var(--color1);
+}
+
+.color2 {
+    color: var(--color2);
+}
+
+.color3 {
+    color: var(--color3);
+}
+
+.color4 {
+    color: var(--color4);
+}
+
+.color5 {
+    color: var(--color5);
+}
+
+.color6 {
+    color: var(--color6);
+}
+
+.color7 {
+    color: var(--color7);
+}
+
+.mat-mini-fab.mat-accent {
+    background-color: rgba(20, 20, 20, 0.40);
+    color: white;
+}
+
+.tilePage {
+    display: flex;
+    gap: 1rem;
+    overflow: hidden;
+}
+
+.tile {
+    position: relative;
+    box-sizing: border-box;
+    min-width: 80px;
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: .6rem;
+    cursor: pointer;
+    background-color: #323232;
+    transition: transform 300ms ease, color 300ms ease;
+    box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.30), 0px 0px 15px -5px black;
+}
+
+.tile>.MuiIcon-root,
+.tile>.MuiSvgIcon-root,
+.tile>.name,
+.tile>.sorting {
+    z-index: 1;
+}
+
+.tile.selected {
+    transform: scale(1.15);
+    z-index: 2;
+}
+
+.tile.selected>.MuiIcon-root,
+.tile.selected>.MuiSvgIcon-root {
+    text-shadow: 0px 0px 3px rgba(150, 150, 150, 30%);
+}
+
+.tile:before,
+.tile:after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: inherit;
+    border-radius: 10px;
+}
+
+.tile:before {
+    filter: hue-rotate(-30deg) brightness(1.1);
+    -webkit-mask: linear-gradient(to bottom right, #fff, transparent);
+    mask: linear-gradient(to bottom right, #fff, transparent);
+}
+
+.tile:after {
+    filter: brightness(.9);
+    -webkit-mask: linear-gradient(to top left, #fff, transparent);
+    mask: linear-gradient(to top left, #fff, transparent);
+}
+
+.tile.selected,
+.tile:hover {
+    filter: brightness(1.2)
+}
+
+.tile>.MuiIcon-root {
+    transform: scale(1.5);
+    margin-top: -10px;
+}
+
+.tile>.MuiSvgIcon-root {
+    transform: scale(1.5);
+}
+
+.tile>.MuiIcon-root:not([hidden])+.name,
+.tile>.MuiSvgIcon-root:not([hidden])+.name {
+    position: absolute;
+    bottom: 5px;
+}
+
+.tile .sorting {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+}
+
+.tile .sorting button {
+    background-color: rgba(0, 0, 0, .40);
+    cursor: pointer;
+    border: none;
+    border-radius: 15px;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.tile .move-back {
+    position: absolute;
+    left: -10px;
+}
+
+.tile .move-next {
+    position: absolute;
+    right: -10px;
+}
+
+.tile-layout {
+    display: grid;
+    grid-template-rows: 50% 50%;
+    width: 390px;
+    min-width: 390px;
+    height: 750px;
+    box-sizing: border-box;
+    background-position: center;
+    background-size: cover;
+}
+
+.tile-layout .tile-container {
+    position: relative;
+    justify-self: center;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.tile-container .previous,
+.tile-container .next {
+    opacity: 0;
+    transition: opacity 300ms;
+    position: absolute;
+    top: 40px;
+    bottom: 40px;
+    display: flex;
+    color: white;
+}
+
+.tile-container .previous button,
+.tile-container .next button {
+    background-color: rgba(0, 0, 0, .40);
+    cursor: pointer;
+    border: none;
+    border-radius: 15px;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.tile-container .previous:not([hidden]),
+.tile-container .next:not([hidden]) {
+    opacity: 1;
+}
+
+.tile-container .previous {
+    left: calc(5px + env(safe-area-inset-left));
+}
+
+.tile-container .next {
+    right: calc(5px + env(safe-area-inset-right));
+}
+
+.tile-container.parents .previous,
+.tile-container.parents .next {
+    align-items: flex-end;
+}
+
+.tile-container.children .previous,
+.tile-container.children .next {
+    align-items: flex-start;
+}
+
+.tile-container.parents {
+    align-items: flex-end;
+    padding: calc(40px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right)) 5px calc(20px + env(safe-area-inset-left));
+}
+
+.tile-container.children {
+    align-items: flex-start;
+    padding: 5px calc(20px + env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left));
+}
+
+.tile-container .tiles {
+    display: flex;
+    flex-wrap: wrap;
+    height: auto;
+    max-height: 100%;
+    justify-content: center;
+    padding: 20px;
+    gap: 10px;
+}
+
+.tile-container.children .tiles {
+    backdrop-filter: blur(5px);
+    opacity: 0;
+    transition: opacity 1s;
+    border-radius: 10px;
+}
+
+.tile-container.children.has-children .tiles {
+    opacity: 1;
+}
+
+.command-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.command {
+    position: relative;
+    display: table;
+    background: var(--color2);
+    color: #fff;
+    margin: 4px 0;
+    padding: 12px 40px 8px 35px;
+    border-radius: 3px;
+    min-height: 30px;
+    max-width: 380px;
+}
+
+.command:before {
+    content: '';
+    /* Required to display content */
+    position: absolute;
+    /* Sets the position absolute to the top div */
+    top: 0;
+    left: 10px;
+    width: 0;
+    z-index: 1;
+    height: 0;
+    border-top: solid 4px var(--background-color);
+    /* Creates the notch */
+    border-left: solid 8px transparent;
+    /* Creates triangle effect */
+    border-right: solid 8px transparent;
+    /* Creates triangle effect */
+}
+
+.command:after {
+    content: '';
+    /* Required to display content */
+    position: absolute;
+    /* Sets the position absolute to the top div */
+    bottom: -4px;
+    left: 10px;
+    width: 0;
+    z-index: 2;
+    height: 0;
+    border-top: solid 4px #0288D1;
+    /* Creates the notch */
+    border-left: solid 8px transparent;
+    /* Creates triangle effect */
+    border-right: solid 8px transparent;
+    /* Creates triangle effect */
+}
+
+.command .remove,
+.command .add {
+    font-family: monospace;
+    position: absolute;
+    right: 0;
+    top: 0;
+    cursor: pointer;
+}
+
+.command.color-1 {
+    background: var(--color1);
+}
+
+.command.color-1:after {
+    border-top-color: var(--color1);
+}
+
+.command.color-2 {
+    background: var(--color2);
+}
+
+.command.color-2:after {
+    border-top-color: var(--color2);
+}
+
+.command.color-3 {
+    background: var(--color3);
+}
+
+.command.color-3:after {
+    border-top-color: var(--color3);
+}
+
+.command.color-4 {
+    background: var(--color4);
+}
+
+.command.color-4:after {
+    border-top-color: var(--color4);
+}
+
+.command.color-5 {
+    background: var(--color5);
+}
+
+.command.color-5:after {
+    border-top-color: var(--color5);
+}
+
+.command.color-6 {
+    background: var(--color6);
+}
+
+.command.color-6:after {
+    border-top-color: var(--color6);
+}
+
+.command.color-7 {
+    background: var(--color7);
+}
+
+.command.color-7:after {
+    border-top-color: var(--color7);
+}

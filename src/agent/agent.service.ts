@@ -1,4 +1,4 @@
-import { concatMap, firstValueFrom, map, Observable, of, shareReplay, Subscription, switchAll } from "rxjs";
+import { combineLatest, concatMap, firstValueFrom, map, Observable, of, shareReplay, Subscription, switchAll } from "rxjs";
 import type { AgentData, Plugin } from "@launch-deck/common";
 import { AgentHubService } from "./agent-hub.service";
 import { CommandService } from "./command.service";
@@ -8,6 +8,7 @@ import { SettingsService } from "./settings.service";
 import { StateService } from "./state.service";
 import { ActiveWindowService } from "./active-window.service";
 import { log } from 'electron-log';
+import { ClientSettings } from "./client-data.interface";
 
 export class AgentService {
 
@@ -21,7 +22,6 @@ export class AgentService {
 
     readonly dataObservable: Observable<AgentData>;
     private dataSubscription?: Subscription;
-    private stateSubscription?: Subscription;
 
     public get connectionObservable() {
         return this.client.connectionObservable;
@@ -60,18 +60,6 @@ export class AgentService {
             ),
             shareReplay(1)
         );
-
-        // Whenever there is new data, save it
-        this.client.data.subscribe(agentData => {
-            log("OnData");
-            this.dataService.saveData(agentData);
-        });
-
-        // Whenever there are commands, handle them
-        this.client.commands.subscribe(async commands => {
-            log("OnCommands: " + commands.length);
-            await this.commandService.handleCommands(commands);
-        });
 
         // Whenever there are commands, handle them
         this.client.tileCommands.subscribe(async tileId => {
@@ -119,19 +107,41 @@ export class AgentService {
             this.dataService.saveData(data);
 
             // Whenever the data changes, send it to the clients
-            this.dataSubscription = this.dataObservable.subscribe(async agentData => {
+            this.dataSubscription = combineLatest([
+                this.dataObservable.pipe(map(agentData => {
+                    return {
+                        sortedTiles: agentData.tiles.sort((a, b) => {
+                            var ia = agentData.tileOrder.indexOf(a.id);
+                            var ib = agentData.tileOrder.indexOf(b.id);
+                            return ia - ib;
+                        }), clientSettings: agentData.settings.clientSettings
+                    };
+                })),
+                this.stateService.state
+            ]).subscribe(async ([{ sortedTiles, clientSettings }, agentState]) => {
+
                 log("Sending data");
-                await this.client.sendData(agentData);
+
+                // Determine based on events if a tile should be active
+                const currentProcessName = agentState.coreState?.activeWindow;
+
+                const tiles = sortedTiles.map(tile => ({
+                    id: tile.id,
+                    name: tile.name,
+                    icon: tile.icon,
+                    color: tile.color,
+                    parentId: tile.parentId,
+                    active: currentProcessName?.toLowerCase() === tile.processName?.toLowerCase()
+                }));
+
+                await this.client.sendData({
+                    tiles,
+                    clientSettings: clientSettings as ClientSettings
+                });
             });
 
-            // Whenever the state changes, send it to the clients
-            this.stateSubscription = this.stateService.observeState().subscribe(async agentState => {
-                log("Sending state");
-                await this.client.sendState(agentState);
-            });
-
-        } catch (ignored) {
-            // This is ignored because it is logged upstream and the UI will respond to allow trying again
+        } catch (e) {
+            log('Agent Service failed to connect', e);
         }
     }
 
@@ -163,9 +173,6 @@ export class AgentService {
     private unsubscribe(): void {
         if (this.dataSubscription) {
             this.dataSubscription.unsubscribe();
-        }
-        if (this.stateSubscription) {
-            this.stateSubscription.unsubscribe();
         }
     }
 }

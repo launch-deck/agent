@@ -11,6 +11,10 @@ export class StateService {
     };
     private readonly stateSubject: Subject<AgentState> = new BehaviorSubject<AgentState>(this.currentState);
 
+    public get state(): Observable<AgentState> {
+        return this.stateSubject;
+    }
+
     constructor(private pluginService: PluginService, private window: ActiveWindowService) {
 
         const stateObservables = this.pluginService.getPlugins()
@@ -63,10 +67,6 @@ export class StateService {
             this.stateSubject.next(this.currentState);
         });
 
-    }
-
-    public observeState(): Observable<AgentState> {
-        return this.stateSubject;
     }
 
 }

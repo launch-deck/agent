@@ -19,6 +19,9 @@ export class SettingsService {
         if (agentData.settings.pluginSettings == null) {
             agentData.settings.pluginSettings = {};
         }
+        if (agentData.settings.clientSettings == null) {
+            agentData.settings.clientSettings = {};
+        }
 
         for (let plugin of this.pluginService.getPlugins()) {
 

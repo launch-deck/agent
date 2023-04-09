@@ -9,7 +9,7 @@ const keepAlive = setInterval(() => { }, 60000);
 // TODO: Handle events from plugins more generically
 const eventActions = ["state"];
 
-class PluginWorker {
+class PluginWorkerThread {
 
     private plugin?: Plugin;
 
@@ -99,4 +99,4 @@ class PluginWorker {
 
 }
 
-new PluginWorker(workerData);
+new PluginWorkerThread(workerData);

@@ -1,7 +1,7 @@
 import { Observable, ReplaySubject, Subject } from "rxjs";
-import type { AgentData } from "@launch-deck/common";
 import ElectronStore from 'electron-store';
 import { log } from 'electron-log';
+import { AgentData } from "../interfaces";
 
 export class DataService {
 

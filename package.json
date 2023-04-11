@@ -29,7 +29,7 @@
     "dependencies": {
         "@emotion/react": "^11.10.6",
         "@emotion/styled": "^11.10.6",
-        "@launch-deck/common": "0.0.1-snapshot.2",
+        "@launch-deck/common": "0.0.1-snapshot.3",
         "@launch-deck/process-addon": "1.0.5",
         "@microsoft/signalr": "^6.0.8",
         "@mui/icons-material": "^5.11.11",

@@ -1,7 +1,7 @@
-import { BehaviorSubject, distinctUntilChanged, fromEvent, map, merge, Observable, Subject } from "rxjs";
+import { BehaviorSubject, distinctUntilChanged, fromEvent, map, merge, tap, Observable, Subject } from "rxjs";
 import { PluginService } from "./plugin.service";
 import { ActiveWindowService } from "./active-window.service";
-import type { AgentState } from "@launch-deck/common";
+import { AgentState } from "../interfaces";
 
 export class StateService {
 
@@ -40,6 +40,7 @@ export class StateService {
 
         const windowObservable = this.window.activeWindow.pipe(
             distinctUntilChanged(),
+            tap(window => console.log("Window Changed", window)),
             map(application => {
                 let coreState = {} as { [key: string]: object };
                 coreState = { activeWindow: application as any };

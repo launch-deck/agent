@@ -1,4 +1,4 @@
-import type { AgentData, Settings } from "@launch-deck/common";
+import { AgentData, Settings } from "../interfaces";
 import { PluginService } from "./plugin.service";
 
 export class SettingsService {

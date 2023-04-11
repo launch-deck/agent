@@ -1,10 +1,11 @@
-import { ClientSettings, Tile } from "@launch-deck/common";
+import { ClientSettings } from "@launch-deck/common";
 import { useLayoutEffect, useRef, useState } from "react";
 import Add from '@mui/icons-material/Add';
 import ChevronLeft from '@mui/icons-material/ChevronLeft';
 import ChevronRight from '@mui/icons-material/ChevronRight';
 import TileComp from "./tile";
 import contextBridge from "./context-bridge";
+import { Tile } from "../interfaces";
 
 interface Props {
     allTiles: Tile[]

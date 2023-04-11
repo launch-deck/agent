@@ -1,5 +1,5 @@
 import Box from "@mui/material/Box";
-import { Settings } from "@launch-deck/common";
+import { Settings } from "../interfaces";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
@@ -127,7 +127,7 @@ export default function Settings({ settings, settingsChanged, onSave, onCancel }
                         variant="outlined"
                         type="number"
                         inputProps={{ min: 0, max: 1, step: .1 }}
-                        value={settings?.clientSettings.tileAlpha || 1}
+                        value={settings?.clientSettings.tileAlpha}
                         onChange={handleTileAlphaChange} />
 
                     <TextField
@@ -135,7 +135,7 @@ export default function Settings({ settings, settingsChanged, onSave, onCancel }
                         variant="outlined"
                         type="number"
                         inputProps={{ min: 0, max: 10, step: 1 }}
-                        value={settings?.clientSettings.tileBlur || 0}
+                        value={settings?.clientSettings.tileBlur}
                         onChange={handleTileBlurChange} />
                 </Box>
 

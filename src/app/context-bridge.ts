@@ -1,5 +1,5 @@
-import { AgentData, Command, Settings, Tile } from "@launch-deck/common";
-import { ContextBridgeApi } from "../context-bridge-api.interface";
+import { Command } from "@launch-deck/common";
+import { AgentData, ContextBridgeApi, Tile, Settings } from "../interfaces";
 
 const contextBridge = (window as any).api as ContextBridgeApi;
 

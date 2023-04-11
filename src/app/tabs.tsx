@@ -4,7 +4,6 @@ import Tabs from "@mui/material/Tabs";
 import Typography from "@mui/material/Typography";
 import React from "react";
 import Connect from "./connect";
-import Settings from "./settings";
 import Tiles from "./tiles";
 
 interface TabPanelProps {

@@ -1,9 +1,9 @@
-import { Tile, Settings, ClientSettings } from "@launch-deck/common";
 import { useEffect, useState } from "react";
 import TileEdit from "./tile-edit";
 import TileLayout from "./tile-layout";
 import contextBridge from "./context-bridge";
 import SettingsComp from "./settings";
+import { Tile, Settings } from "../interfaces";
 
 export default function Tiles() {
 

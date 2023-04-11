@@ -1,5 +1,5 @@
 import { combineLatest, concatMap, firstValueFrom, map, Observable, of, shareReplay, Subscription, switchAll } from "rxjs";
-import type { AgentData, Plugin } from "@launch-deck/common";
+import type { ClientSettings, ClientTile, Plugin } from "@launch-deck/common";
 import { AgentHubService } from "./agent-hub.service";
 import { CommandService } from "./command.service";
 import { DataService } from "./data.service";
@@ -8,7 +8,7 @@ import { SettingsService } from "./settings.service";
 import { StateService } from "./state.service";
 import { ActiveWindowService } from "./active-window.service";
 import { log } from 'electron-log';
-import { ClientSettings } from "./client-data.interface";
+import { AgentData } from "../interfaces";
 
 export class AgentService {
 
@@ -125,7 +125,7 @@ export class AgentService {
                 // Determine based on events if a tile should be active
                 const currentProcessName = agentState.coreState?.activeWindow;
 
-                const tiles = sortedTiles.map(tile => ({
+                const tiles: ClientTile[] = sortedTiles.map(tile => ({
                     id: tile.id,
                     name: tile.name,
                     icon: tile.icon,

@@ -1,8 +1,7 @@
 // See the Electron documentation for details on how to use preload scripts:
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
-import { AgentData } from "@launch-deck/common";
 import { ipcRenderer, contextBridge, IpcRendererEvent } from "electron";
-import { ContextBridgeApi } from "./context-bridge-api.interface";
+import { AgentData, ContextBridgeApi } from "./interfaces";
 import { PluginWorker } from "./agent/plugin-worker.class";
 
 const exposedApi: ContextBridgeApi = {

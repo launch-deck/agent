@@ -1,7 +1,7 @@
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { Observable, Subject, ReplaySubject, firstValueFrom } from "rxjs";
 import { log, error } from 'electron-log';
-import { ClientData } from './client-data.interface';
+import { ClientData } from '@launch-deck/common';
 
 export enum ConnectionState {
     disconnected,
@@ -90,7 +90,10 @@ export class AgentHubService {
     public async sendData(data: ClientData): Promise<void> {
         try {
             await this.invoke("SendData", data);
-            log(`Data Sent`, data);
+            log(`Data Sent`, {
+                activeTile: data.tiles.find(tile => tile.active),
+                clientSettings: data.clientSettings
+            });
         } catch (e) {
             error(`Failed to send data`, data, e);
         }

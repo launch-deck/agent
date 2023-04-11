@@ -1,4 +1,4 @@
-import { Command, Tile } from "@launch-deck/common";
+import { Command } from "@launch-deck/common";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -8,6 +8,7 @@ import TileComp from "./tile";
 import IconPicker from "./icon-picker";
 import CommandComp from "./command";
 import contextBridge from "./context-bridge";
+import { Tile } from "../interfaces";
 
 interface Props {
     tile: Tile

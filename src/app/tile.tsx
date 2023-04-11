@@ -1,7 +1,8 @@
-import { ClientSettings, Tile } from "@launch-deck/common";
+import { ClientSettings } from '@launch-deck/common';
 import ChevronRight from '@mui/icons-material/ChevronRight';
 import ChevronLeft from '@mui/icons-material/ChevronLeft';
 import Icon from "@mui/material/Icon";
+import { Tile } from '../interfaces';
 
 interface Props {
     tile: Tile
@@ -40,7 +41,8 @@ export default function Tile({ tile, clientSettings, selected, showMoveBack, sho
     const defaultBackgroundColor = theme === "dark" ? "#323232" : "#eee";
     const color = theme === "dark" ? "#fff" : "#323232";
     const backgroundColor = hexToRgb(tile.color || defaultBackgroundColor, tileAlpha) || "";
-    const backdropFilter = tileBlur > 0 ? `blur(${tileBlur}px)` : '';
+    const backdropBrightness = theme === "dark" ? "0.9" : "1.1";
+    const backdropFilter = tileBlur > 0 ? `blur(${tileBlur}px) brightness(${backdropBrightness})` : `brightness(${backdropBrightness})`;
 
     return (
         <>

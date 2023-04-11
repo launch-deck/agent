@@ -21,15 +21,12 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: 16.13
+        node-version: 16.x
         cache: 'npm'
         cache-dependency-path: |
           package-lock.json
           app/package-lock.json
     - name: Restore Agent NPM dependencies
-      run: |
-        npm ci
-        npm ci --prefix app
-
+      run: npm ci
     - name: make
       run: npm run make

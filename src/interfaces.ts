@@ -45,9 +45,3 @@ export interface Tile {
     parentId?: string;
     hasChildren?: boolean;
 }
-
-export interface WorkerMessage {
-    action: 'exit' | 'handleCommand' | 'getCommands' | 'getSettingsKeys' | 'loadSettings' | 'event';
-    type?: string;
-    data?: any;
-}

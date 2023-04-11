@@ -1,6 +1,6 @@
 import { workerData, parentPort } from 'worker_threads';
 import type { Plugin } from "@launch-deck/common";
-import { WorkerMessage } from '../interfaces';
+import { WorkerMessage } from './worker-message.interface';
 import { error } from 'electron-log';
 
 // Keep the thread alive

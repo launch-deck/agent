@@ -1,5 +1,6 @@
 import type { Configuration } from 'webpack';
 import CopyPlugin from "copy-webpack-plugin";
+import path from 'path';
 
 export const mainConfig: Configuration = {
     /**
@@ -42,7 +43,7 @@ export const mainConfig: Configuration = {
     plugins: [
         new CopyPlugin({
             patterns: [
-                "worker-thread/plugin-worker-thread.js",
+                { from: path.resolve(__dirname, "worker-thread", "plugin-worker-thread.js") },
                 { from: "node_modules/ws", to: "node_modules/ws" },
                 { from: "node_modules/eventsource", to: "node_modules/eventsource" },
             ],

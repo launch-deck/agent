@@ -5,8 +5,8 @@
     "description": "Virtual application launcher, macro-pad and automation tool",
     "main": ".webpack/main",
     "scripts": {
-        "start": "set NODE_ENV=development&& npm run worker-thread && electron-forge start",
-        "package": "npm run worker-thread && electron-forge package",
+        "start": "set NODE_ENV=development&& electron-forge start",
+        "package": "electron-forge package",
         "make": "electron-forge make",
         "publish": "electron-forge publish",
         "lint": "eslint --ext .ts,.tsx .",
@@ -14,8 +14,7 @@
         "patch-release": "npm version patch -m \"v%s Patch Release\" && git push --follow-tags",
         "minor-release": "npm version minor -m \"v%s Minor Release\" && git push --follow-tags",
         "major-release": "npm version major -m \"v%s Major Release\" && git push --follow-tags",
-        "tsc": "tsc",
-        "worker-thread": "tsc --project tsconfig-worker-thread.json"
+        "tsc": "tsc"
     },
     "keywords": [],
     "author": {

@@ -10,17 +10,7 @@ import { mainConfig } from './webpack.main.config';
 import { rendererConfig } from './webpack.renderer.config';
 
 const config: ForgeConfig = {
-    packagerConfig: {
-        // ignore: [
-        //     /^\/\.github$/,
-        //     /^\/app$/,
-        //     /^\/out$/,
-        //     /^\/scratch$/,
-        //     /^\/src$/,
-        //     /^\/[.]gitignore$/,
-        //     /^\/tsconfig[.]json$/
-        // ]
-    },
+    packagerConfig: {},
     rebuildConfig: {},
     makers: [
         new MakerSquirrel({}),

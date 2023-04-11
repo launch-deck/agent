@@ -1,7 +1,6 @@
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { Observable, Subject, ReplaySubject, firstValueFrom } from "rxjs";
 import { log, error } from 'electron-log';
-import ws from 'ws';
 import { ClientData } from './client-data.interface';
 
 export enum ConnectionState {

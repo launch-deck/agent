@@ -1,10 +1,7 @@
 import type { Configuration } from 'webpack';
 import CopyPlugin from "copy-webpack-plugin";
 
-import { rules } from './webpack.rules';
-
 export const mainConfig: Configuration = {
-    target: "node",
     /**
      * This is the main entry point for your application, it's the first file
      * that runs in the main process.
@@ -12,7 +9,35 @@ export const mainConfig: Configuration = {
     entry: './src/index.ts',
     // Put your normal webpack config below here
     module: {
-        rules,
+        rules: [
+            // Add support for native node modules
+            {
+                // We're specifying native_modules in the test because the asset relocator loader generates a
+                // "fake" .node file which is really a cjs file.
+                test: /native_modules[/\\].+\.node$/,
+                use: 'node-loader',
+            },
+            {
+                test: /[/\\]node_modules[/\\].+\.(m?js|node)$/,
+                parser: { amd: false },
+                use: {
+                    loader: '@vercel/webpack-asset-relocator-loader',
+                    options: {
+                        outputAssetBase: 'native_modules',
+                    },
+                },
+            },
+            {
+                test: /\.tsx?$/,
+                exclude: /(node_modules|\.webpack)/,
+                use: {
+                    loader: 'ts-loader',
+                    options: {
+                        transpileOnly: true,
+                    },
+                },
+            },
+        ],
     },
     plugins: [
         new CopyPlugin({
@@ -23,6 +48,5 @@ export const mainConfig: Configuration = {
     ],
     resolve: {
         extensions: ['.js', '.ts', '.jsx', '.tsx', '.css', '.json'],
-    },
-    externals: ['ws']
+    }
 };

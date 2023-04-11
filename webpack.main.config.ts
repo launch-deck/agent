@@ -42,7 +42,9 @@ export const mainConfig: Configuration = {
     plugins: [
         new CopyPlugin({
             patterns: [
-                "./worker-thread/plugin-worker-thread.js"
+                "./worker-thread/plugin-worker-thread.js",
+                { from: "node_modules/ws", to: "node_modules/ws" },
+                { from: "node_modules/eventsource", to: "node_modules/eventsource" },
             ],
         })
     ],

@@ -1,12 +1,11 @@
-import { ClientSettings } from '@launch-deck/common';
 import ChevronRight from '@mui/icons-material/ChevronRight';
 import ChevronLeft from '@mui/icons-material/ChevronLeft';
 import Icon from "@mui/material/Icon";
 import { Tile } from '../interfaces';
+import { useAppSelector } from './redux/hooks';
 
 interface Props {
     tile: Tile
-    clientSettings?: ClientSettings
     selected?: boolean
     showMoveBack?: boolean
     showMoveNext?: boolean
@@ -26,7 +25,9 @@ const hexToRgb = (hex: string, alpha: number): string | null => {
     return result ? `rgba(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}, ${alpha})` : null;
 }
 
-export default function Tile({ tile, clientSettings, selected, showMoveBack, showMoveNext, onMoveBack, onMoveNext, onClick }: Props) {
+export default function Tile({ tile, selected, showMoveBack, showMoveNext, onMoveBack, onMoveNext, onClick }: Props) {
+
+    const clientSettings = useAppSelector(state => state.agentData.settings.clientSettings);
 
     let tileAlpha = 1;
     if (clientSettings?.tileAlpha !== undefined && clientSettings.tileAlpha >= 0) {

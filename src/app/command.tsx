@@ -8,17 +8,29 @@ interface Props {
     command: Command
     commandInputs: { [key: string]: CommandInput } | null | undefined
     color: number
+    onUpdate?: (command: Command) => void
     onRemove?: () => void
     onAdd?: () => void
 }
 
-export default function Command({ command, commandInputs, color, onRemove, onAdd }: Props) {
+export default function Command({ command, commandInputs, color, onUpdate, onRemove, onAdd }: Props) {
 
-    command.data = command.data || {};
+    const handleUpdate = (key: string, value: string) => {
+        if (command && onUpdate) {
+            onUpdate({
+                ...command,
+                data: {
+                    ...command.data,
+                    [key]: value
+                }
+            });
+        }
+    }
 
     const commandInputComps = (commandInputs && onRemove) ? Object.keys(commandInputs).map(key => {
         if (commandInputs && commandInputs[key]) {
-            return (<CommandInputComp key={key} commandKey={key} commandInput={commandInputs[key]} commandData={command.data} />)
+            const defaultValue = command.data?.hasOwnProperty(key) ? command.data[key] : '';
+            return (<CommandInputComp key={key} commandInput={commandInputs[key]} defaultValue={defaultValue} onUpdate={(value) => handleUpdate(key, value)} />)
         }
         return (<></>);
     }) : [];

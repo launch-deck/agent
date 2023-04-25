@@ -61,13 +61,21 @@ export class PluginService {
         this.pluginsLoaded.next(true);
     }
 
-    public async startPlugin(ns: string) {
-        await this.getExternalPlugin(ns)?.start();
+    public async togglePlugin(ns: string): Promise<void> {
+        const plugin = this.getExternalPlugin(ns);
+
+        if (plugin) {
+            plugin.started ? this.stopPlugin(plugin) : await this.startPlugin(plugin);
+        }
+    }
+
+    private async startPlugin(plugin: PluginWorker): Promise<void> {
+        await plugin.start();
         this.pluginStatus.next(this.plugins);
     }
 
-    public stopPlugin(ns: string) {
-        this.getExternalPlugin(ns)?.stop();
+    private stopPlugin(plugin: PluginWorker) {
+        plugin.stop();
         this.pluginStatus.next(this.plugins);
     }
 

@@ -1,20 +1,11 @@
-import { ClientSettings } from "@launch-deck/common";
 import { useLayoutEffect, useRef, useState } from "react";
 import Add from '@mui/icons-material/Add';
 import ChevronLeft from '@mui/icons-material/ChevronLeft';
 import ChevronRight from '@mui/icons-material/ChevronRight';
 import TileComp from "./tile";
-import contextBridge from "./context-bridge";
 import { Tile } from "../interfaces";
-
-interface Props {
-    allTiles: Tile[]
-    selected?: Tile
-    clientSettings?: ClientSettings
-    editMode: boolean
-    onTileSelect: (tile?: Tile) => void
-    onOrderUpdate: () => void
-}
+import { useAppDispatch, useAppSelector } from "./redux/hooks";
+import { selectTile, updateSortOrder } from "./redux/agent-data-slice";
 
 const useWindowSize = () => {
     const [size, setSize] = useState([0, 0]);
@@ -76,9 +67,15 @@ const calculateMaxTileCounts = (parentTilesElem: Element, childTilesElem: Elemen
     return [parentColumns * parentRows, childColumns * childRows];
 }
 
-export default function TileLayout({ allTiles, selected, clientSettings, editMode, onTileSelect, onOrderUpdate }: Props) {
+export default function TileLayout() {
 
-    const [width, height] = useWindowSize();
+    const dispatch = useAppDispatch();
+    const allTiles = useAppSelector(state => state.agentData.tiles);
+    const selected = useAppSelector(state => state.selectedTile);
+    const clientSettings = useAppSelector(state => state.agentData.settings.clientSettings);
+    const editMode = true;
+
+    useWindowSize();
 
     const [state, setState] = useState({
         parentPageNumber: 1,
@@ -94,15 +91,19 @@ export default function TileLayout({ allTiles, selected, clientSettings, editMod
     const parentTiles = allTiles.filter(tile => !tile.parentId);
     const childTiles = allTiles.filter(tile => tile.parentId === selectedParentTileId);
 
+    const handleTileSelect = (tile?: Tile) => {
+        dispatch(selectTile(tile));
+    }
+
     const addTile = (e: any, parentId?: string) => {
         e.stopPropagation();
 
-        onTileSelect({
+        dispatch(selectTile({
             id: "0",
             name: "",
             commands: [],
             parentId
-        });
+        }));
     }
 
     const previousParentPage = (e: any) => {
@@ -137,11 +138,11 @@ export default function TileLayout({ allTiles, selected, clientSettings, editMod
         });
     }
 
-    const moveTileNext = async (tile: Tile, index: number, tileList: Tile[]) => {
+    const moveTileNext = (tile: Tile, index: number, tileList: Tile[]) => {
         const nextTile = tileList.length > (index + 1) ? tileList[index + 1] : null;
 
         if (nextTile) {
-            const ids = allTiles.sort((a, b) => {
+            const ids = allTiles.slice().sort((a, b) => {
                 const aId = a.parentId ?? "null";
                 const bId = b.parentId ?? "null";
                 return aId === bId ? 0 : aId > bId ? 1 : -1;
@@ -152,16 +153,15 @@ export default function TileLayout({ allTiles, selected, clientSettings, editMod
             const nextIndex = ids.indexOf(nextTile.id);
             ids.splice(nextIndex + 1, 0, tile.id);
 
-            await contextBridge.updateTileOrder(ids);
-            onOrderUpdate();
+            dispatch(updateSortOrder(ids));
         }
     }
 
-    const moveTileBack = async (tile: Tile, index: number, tileList: Tile[]) => {
+    const moveTileBack = (tile: Tile, index: number, tileList: Tile[]) => {
         const previousTile = tileList.length > 1 && index > 0 ? tileList[index - 1] : null;
 
         if (previousTile) {
-            const ids = allTiles.sort((a, b) => {
+            const ids = allTiles.slice().sort((a, b) => {
                 const aId = a.parentId ?? "null";
                 const bId = b.parentId ?? "null";
                 return aId === bId ? 0 : aId > bId ? 1 : -1;
@@ -172,8 +172,7 @@ export default function TileLayout({ allTiles, selected, clientSettings, editMod
             const previousIndex = ids.indexOf(previousTile.id);
             ids.splice(previousIndex, 0, tile.id);
 
-            await contextBridge.updateTileOrder(ids);
-            onOrderUpdate();
+            dispatch(updateSortOrder(ids));
         }
     }
 
@@ -199,25 +198,23 @@ export default function TileLayout({ allTiles, selected, clientSettings, editMod
         <TileComp
             key={tile.id}
             tile={tile}
-            clientSettings={clientSettings}
             selected={tile.id === selectedTileId || tile.id === selectedParentTileId}
             showMoveBack={tile.id === selectedTileId && parentTiles.indexOf(tile) > 0}
             showMoveNext={tile.id === selectedTileId && parentTiles.indexOf(tile) + 1 < parentTiles.length}
             onMoveNext={() => moveTileNext(tile, index, parentTiles)}
             onMoveBack={() => moveTileBack(tile, index, parentTiles)}
-            onClick={() => onTileSelect(tile)} />
+            onClick={() => handleTileSelect(tile)} />
     ));
     const children = childTiles.slice(childSkip, childTake).map((tile, index) => (
         <TileComp
             key={tile.id}
             tile={tile}
-            clientSettings={clientSettings}
             selected={tile.id === selectedTileId}
             showMoveBack={tile.id === selectedTileId && childTiles.indexOf(tile) > 0}
             showMoveNext={tile.id === selectedTileId && childTiles.indexOf(tile) + 1 < childTiles.length}
             onMoveNext={() => moveTileNext(tile, index, childTiles)}
             onMoveBack={() => moveTileBack(tile, index, childTiles)}
-            onClick={() => onTileSelect(tile)} />
+            onClick={() => handleTileSelect(tile)} />
     ));
     const hasChildren = selectedParentTileId && selectedParentTileId !== "0" && (editMode || children.length > 0);
 
@@ -225,7 +222,7 @@ export default function TileLayout({ allTiles, selected, clientSettings, editMod
     const childBackgroundColor = clientSettings?.theme === 'light' ? "rgba(235, 235, 235, 40%)" : "rgba(20, 20, 20, 40%)";
 
     return (
-        <div className="tile-layout" style={{ backgroundImage: imageUrl }} onClick={() => onTileSelect()}>
+        <div className="tile-layout" style={{ backgroundImage: imageUrl }} onClick={() => handleTileSelect()}>
             <div className="tile-container parents" ref={parentTilesElem}>
                 <div className="tiles">
                     {parents}

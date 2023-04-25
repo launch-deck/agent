@@ -2,7 +2,6 @@ import Autocomplete from "@mui/material/Autocomplete";
 import Box from "@mui/material/Box";
 import Icon from "@mui/material/Icon";
 import TextField from "@mui/material/TextField";
-import { useState } from "react";
 
 interface Props {
     value?: string

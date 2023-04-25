@@ -1,5 +1,5 @@
-import { combineLatest, concatMap, firstValueFrom, map, Observable, of, shareReplay, Subscription, switchAll } from "rxjs";
-import type { ClientSettings, ClientTile, Plugin } from "@launch-deck/common";
+import { combineLatest, firstValueFrom, map, Observable, shareReplay, Subscription } from "rxjs";
+import type { ClientSettings, ClientTile, Command, Plugin } from "@launch-deck/common";
 import { AgentHubService } from "./agent-hub.service";
 import { CommandService } from "./command.service";
 import { DataService } from "./data.service";
@@ -8,7 +8,7 @@ import { SettingsService } from "./settings.service";
 import { StateService } from "./state.service";
 import { ActiveWindowService } from "./active-window.service";
 import { log } from 'electron-log';
-import { AgentData } from "../interfaces";
+import { AgentData, Settings, Tile } from "../interfaces";
 
 export class AgentService {
 
@@ -47,17 +47,6 @@ export class AgentService {
                 agentData.settings = this.settingsService.getAgentDataSettings(agentData);
                 return agentData;
             }),
-            concatMap((agentData: AgentData, index: number) => index === 0
-                ? of(agentData).pipe(
-                    map(async (agentData) => {
-                        // Add plugin commands to the data only the first time the data is loaded
-                        agentData.commands = await this.commandService.getCommands();
-                        return agentData;
-                    }),
-                    switchAll()
-                )
-                : of(agentData)
-            ),
             shareReplay(1)
         );
 
@@ -150,12 +139,8 @@ export class AgentService {
         this.client.stopConnection();
     }
 
-    public startPlugin(ns: string): void {
-        this.pluginService.startPlugin(ns);
-    }
-
-    public stopPlugin(ns: string): void {
-        this.pluginService.stopPlugin(ns);
+    public async togglePlugin(ns: string): Promise<void> {
+        this.pluginService.togglePlugin(ns);
     }
 
     public stopAllPlugins(): void {
@@ -166,9 +151,65 @@ export class AgentService {
         return this.pluginService.getCorePlugins();
     }
 
+    public async getAvailableCommands(): Promise<Command[]> {
+        return await this.commandService.getCommands();
+    }
+
     public updateData(agentData: AgentData): void {
         this.dataService.saveData(agentData);
     }
+
+    public async updateSettings(settings: Settings): Promise<Settings> {
+        const data = await firstValueFrom(this.dataService.observeData());
+        data.settings = settings;
+        this.dataService.saveData(data);
+        return settings;
+    };
+
+    public async upsertTile(tile: Tile): Promise<Tile> {
+        const data = await firstValueFrom(this.dataService.observeData());
+
+        tile = {
+            ...tile
+        }
+
+        if (tile.id === '0') {
+            var length = data.tiles.push(tile) + 1;
+            tile.id = length.toString();
+            data.tileOrder.push(tile.id);
+        } else {
+            data.tiles = data.tiles.map(t => {
+                if (t.id === tile.id) {
+                    return tile;
+                }
+                return t;
+            });
+        }
+
+        this.dataService.saveData(data);
+        return tile;
+    };
+
+    public async removeTile(id: string): Promise<string> {
+        const data = await firstValueFrom(this.dataService.observeData());
+
+        var index = data.tiles.findIndex(t => t.id === id);
+        if (index >= 0) {
+            data.tiles.splice(index, 1);
+        }
+
+        this.dataService.saveData(data);
+        return id;
+    };
+
+    public async updateSortOrder(order: string[]): Promise<string[]> {
+        const data = await firstValueFrom(this.dataService.observeData());
+
+        data.tileOrder = order;
+
+        this.dataService.saveData(data);
+        return order;
+    };
 
     private unsubscribe(): void {
         if (this.dataSubscription) {

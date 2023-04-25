@@ -2,9 +2,11 @@ import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import Typography from "@mui/material/Typography";
-import React from "react";
+import React, { useEffect } from "react";
 import Connect from "./connect";
 import Tiles from "./tiles";
+import { useAppDispatch } from "./redux/hooks";
+import { fetchData } from "./redux/agent-data-slice";
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -43,6 +45,13 @@ function a11yProps(index: number) {
 }
 
 export default function BasicTabs() {
+
+    const dispatch = useAppDispatch();
+
+    useEffect(() => {
+        dispatch(fetchData())
+    }, [dispatch])
+
     const [value, setValue] = React.useState(0);
 
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {

@@ -5,71 +5,83 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
-
-interface Props {
-    settings?: Settings
-    settingsChanged: (settings: Settings) => void
-    onSave: () => void
-    onCancel: () => void
-}
+import { useAppDispatch, useAppSelector } from "./redux/hooks";
+import { fetchData, saveSettings, updateSettings } from "./redux/agent-data-slice";
 
 const hasPluginSettings = (pluginSettings: any): boolean => {
     return Object.keys(pluginSettings).length > 0;
 }
 
-export default function Settings({ settings, settingsChanged, onSave, onCancel }: Props) {
+export default function Settings() {
+
+    const dispatch = useAppDispatch();
+    const settings = useAppSelector(state => state.agentData.settings);
 
     if (!settings) {
         return <></>
     }
 
+    const handleSave = () => {
+        dispatch(saveSettings(settings));
+    }
+
+    const handleCancel = () => {
+        dispatch(fetchData());
+    }
+
     const handleThemeChange = (event: any) => {
-        settingsChanged({
+        dispatch(updateSettings({
             ...settings,
             clientSettings: {
                 ...settings.clientSettings,
                 theme: event.target.checked ? 'light' : 'dark'
             }
-        });
+        }));
     };
 
     const handleImageChange = (event: any) => {
-        settingsChanged({
+        dispatch(updateSettings({
             ...settings,
             clientSettings: {
                 ...settings.clientSettings,
                 backgroundImageUrl: event.target.value
             }
-        });
+        }));
     };
 
     const handleTileBlurChange = (event: any) => {
-        settingsChanged({
+        dispatch(updateSettings({
             ...settings,
             clientSettings: {
                 ...settings.clientSettings,
                 tileBlur: parseInt(event.target.value)
             }
-        });
+        }));
     };
 
     const handleTileAlphaChange = (event: any) => {
-        settingsChanged({
+        dispatch(updateSettings({
             ...settings,
             clientSettings: {
                 ...settings.clientSettings,
                 tileAlpha: parseFloat(event.target.value)
             }
-        });
+        }));
     };
 
-    const handleUpdatePluginSetting = (pluginKey: string, settingKey: string, event: any): void => {
-        settings.pluginSettings[pluginKey][settingKey] = event?.target?.value ?? "";
-
-        settingsChanged({
-            ...settings
-        });
-    }
+    const handleUpdatePluginSetting = (pluginKey: string, settingKey: string, event: any) => {
+        const update = {
+            ...settings,
+            pluginSettings: {
+                ...settings.pluginSettings,
+                [pluginKey]: {
+                    ...settings.pluginSettings[pluginKey],
+                    [settingKey]: event?.target?.value ?? ""
+                }
+            }
+        }
+        dispatch(updateSettings(update));
+    };
 
     let pluginSettings = [];
     for (let ns in settings.pluginSettings) {
@@ -110,16 +122,16 @@ export default function Settings({ settings, settingsChanged, onSave, onCancel }
 
                     <FormControlLabel
                         sx={{ display: 'block' }}
-                        label="Inverted Theme"
+                        label="Light Theme"
                         control={<Switch
-                            checked={settings?.clientSettings.theme === 'light'}
+                            checked={settings.clientSettings.theme === 'light'}
                             onChange={handleThemeChange}
                         />} />
 
                     <TextField
                         label="Background Image"
                         variant="outlined"
-                        value={settings?.clientSettings.backgroundImageUrl}
+                        value={settings.clientSettings.backgroundImageUrl}
                         onChange={handleImageChange} />
 
                     <TextField
@@ -127,7 +139,7 @@ export default function Settings({ settings, settingsChanged, onSave, onCancel }
                         variant="outlined"
                         type="number"
                         inputProps={{ min: 0, max: 1, step: .1 }}
-                        value={settings?.clientSettings.tileAlpha}
+                        value={settings.clientSettings.tileAlpha}
                         onChange={handleTileAlphaChange} />
 
                     <TextField
@@ -135,18 +147,18 @@ export default function Settings({ settings, settingsChanged, onSave, onCancel }
                         variant="outlined"
                         type="number"
                         inputProps={{ min: 0, max: 10, step: 1 }}
-                        value={settings?.clientSettings.tileBlur}
+                        value={settings.clientSettings.tileBlur}
                         onChange={handleTileBlurChange} />
                 </Box>
 
                 {pluginSettings}
 
                 <Box sx={{ '& > :not(style)': { m: 1 }, }}>
-                    <Button variant="contained" onClick={onSave}>
+                    <Button variant="contained" onClick={handleSave}>
                         Save
                     </Button>
 
-                    <Button variant="outlined" onClick={onCancel}>
+                    <Button variant="outlined" onClick={handleCancel}>
                         Cancel
                     </Button>
                 </Box>

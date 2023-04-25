@@ -7,23 +7,20 @@ import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import Checkbox from "@mui/material/Checkbox";
 import ListItemText from "@mui/material/ListItemText";
-import { useState } from "react";
 
 interface Props {
-    commandKey: string
     commandInput: CommandInput
-    commandData: any
+    defaultValue: string,
+    onUpdate: (value: string) => void
 }
 
-export default function CommandInput({ commandKey, commandInput, commandData }: Props) {
-
-    const [value, setValue] = useState(commandData[commandKey] || '');
+export default function CommandInput({ commandInput, defaultValue, onUpdate }: Props) {
 
     /**
      * Get values from the data to allow for multiple selection using CSV
      */
     const getValues = (): string | string[] => {
-        return commandInput.multiple ? (value.split(",") || []) : value;
+        return commandInput.multiple ? (defaultValue.split(",") || []) : defaultValue;
     }
 
     /**
@@ -32,8 +29,7 @@ export default function CommandInput({ commandKey, commandInput, commandData }: 
      * @param value the selected value(s)
      */
     const handleSetValue = (value: string | string[]): void => {
-        commandData[commandKey] = (value instanceof Array) ? value.filter(v => v !== '').join(',') : value;
-        setValue(commandData[commandKey]);
+        onUpdate((value instanceof Array) ? value.filter(v => v !== '').join(',') : value);
     }
 
     const handleSetSelectValues = (event: any) => {

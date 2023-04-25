@@ -36,7 +36,14 @@ export class CommandService {
 
         await Promise.all(promises);
 
-        return commands;
+        return commands.sort((a, b) => {
+            var order = a.class && b.class ? a.class.localeCompare(b.class) : 0;
+
+            if (order === 0 && a.name && b.name) {
+                order = a.name.localeCompare(b.name);
+            }
+            return order;
+        });
     }
 
     /**

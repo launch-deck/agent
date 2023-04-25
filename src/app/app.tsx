@@ -1,6 +1,8 @@
 import { createRoot } from 'react-dom/client';
+import { Provider } from 'react-redux';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import agentDataStore from './redux/agent-data-store';
 import Tabs from './tabs';
 
 import './app.css';
@@ -15,7 +17,9 @@ function App() {
     return (
         <ThemeProvider theme={darkTheme}>
             <CssBaseline />
-            <Tabs />
+            <Provider store={agentDataStore}>
+                <Tabs />
+            </Provider>
         </ThemeProvider>
     );
 }

@@ -3,144 +3,142 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import TileComp from "./tile";
 import IconPicker from "./icon-picker";
 import CommandComp from "./command";
-import contextBridge from "./context-bridge";
-import { Tile } from "../interfaces";
+import { useAppDispatch, useAppSelector } from "./redux/hooks";
+import { removeTile, resetSelectedTile, selectTile, upsertTile, updateSelectedTile, getAvailableCommands } from "./redux/agent-data-slice";
+import IconButton from "@mui/material/IconButton";
+import Clear from '@mui/icons-material/Clear';
 
-interface Props {
-    tile: Tile
-    onSave: (tile: Tile) => void
-    onDelete: (tile: Tile) => void
-    onDeselect: () => void
-}
+export default function TileEdit() {
 
-export default function TileEdit({ tile, onDelete, onSave, onDeselect }: Props) {
-
-    const getStartingState = (): Tile => {
-        const clone = contextBridge.clone(tile);
-        return {
-            id: clone.id,
-            name: clone.name,
-            processName: clone.processName || '',
-            icon: clone.icon || '',
-            color: clone.color || '#333333',
-            commands: clone.commands,
-            parentId: clone.parentId,
-            hasChildren: clone.hasChildren
-        } as Tile
-    };
-
-    const [cancelCount, setCancelCount] = useState(0);
-
-    const [state, setState] = useState(getStartingState());
-
-    const [commandState, setCommandState] = useState({
-        availableCommands: [] as Command[],
-        inputMap: {} as any,
-        colorMap: {} as any
-    });
+    const dispatch = useAppDispatch();
+    const selectedTile = useAppSelector(state => state.selectedTile);
+    const availableCommands = useAppSelector(state => state.availableCommands);
 
     useEffect(() => {
-        contextBridge.getAvailableCommands().then(availableCommands => {
-            const inputMap: any = {};
-            const colorMap: any = {};
+        dispatch(getAvailableCommands());
+    }, [dispatch]);
 
-            let colors = 7;
-            let color = 1;
-
-            availableCommands.forEach(command => {
-                inputMap[(command.class || "") + command.type] = command.commandInputs;
-                if (!colorMap.hasOwnProperty(command.class)) {
-                    colorMap[(command.class || "")] = color;
-                    if (color === colors) {
-                        color = 1;
-                    } else {
-                        color++;
-                    }
-                }
-            });
-
-            setCommandState({
-                availableCommands,
-                inputMap,
-                colorMap
-            });
-        });
-    }, []);
-
-    if (commandState.availableCommands.length === 0) {
+    if (!selectedTile || !availableCommands || availableCommands.length === 0) {
         return <></>;
     }
 
+    const inputMap: any = {};
+    const colorMap: any = {};
+
+    let colors = 7;
+    let color = 1;
+
+    availableCommands.forEach(command => {
+        inputMap[(command.class || "") + command.type] = command.commandInputs;
+        if (!colorMap.hasOwnProperty(command.class)) {
+            colorMap[(command.class || "")] = color;
+            if (color === colors) {
+                color = 1;
+            } else {
+                color++;
+            }
+        }
+    });
+
+    const handleSave = () => {
+        if (!selectedTile.name) {
+            return;
+        }
+        dispatch(upsertTile(selectedTile));
+    }
+
+    const handleDelete = () => {
+        dispatch(removeTile(selectedTile.id));
+    }
+
     const handleCancel = () => {
-        if (tile.id === "0") {
-            onDeselect();
+        if (selectedTile.id === "0") {
+            dispatch(selectTile());
         } else {
-            setCancelCount(() => (cancelCount + 1));
-            setState(() => getStartingState());
+            dispatch(resetSelectedTile());
         }
     }
 
     const handleNameChange = (event: any) => {
-        setState({
-            ...state,
+        dispatch(updateSelectedTile({
+            ...selectedTile,
             name: event.target.value
-        });
+        }));
     }
 
     const handleIconChange = (value: any) => {
-        setState({
-            ...state,
+        dispatch(updateSelectedTile({
+            ...selectedTile,
             icon: value
-        });
+        }));
     }
 
     const handleProcessNameChange = (event: any) => {
-        setState({
-            ...state,
+        dispatch(updateSelectedTile({
+            ...selectedTile,
             processName: event.target.value
-        });
+        }));
     }
 
     const handleColorChange = (event: any) => {
-        setState({
-            ...state,
+        dispatch(updateSelectedTile({
+            ...selectedTile,
             color: event.target.value
-        });
+        }));
+    }
+
+    const handleClearColorClick = () => {
+        dispatch(updateSelectedTile({
+            ...selectedTile,
+            color: undefined
+        }));
+    }
+
+    const handleUpdateCommand = (command: Command, index: number) => {
+        dispatch(updateSelectedTile({
+            ...selectedTile,
+            commands: selectedTile.commands.map((c, i) => {
+                if (i === index) {
+                    return command;
+                }
+                return c;
+            })
+        }));
     }
 
     const handleAddCommand = (command: Command) => {
-        setState({
-            ...state,
-            commands: state.commands.concat(command)
-        });
+        dispatch(updateSelectedTile({
+            ...selectedTile,
+            commands: selectedTile.commands.concat(command)
+        }));
     }
 
     const handleRemoveCommand = (command: Command) => {
-        setState({
-            ...state,
-            commands: state.commands.filter(c => c !== command)
-        });
+        dispatch(updateSelectedTile({
+            ...selectedTile,
+            commands: selectedTile.commands.filter(c => c !== command)
+        }));
     }
 
-    const commands = state.commands.map((command, index) => {
-        let commandInputs = commandState.inputMap[(command.class || '') + command.type];
-        let color = commandState.colorMap[command.class || ''];
-        return (<CommandComp key={`${cancelCount} ${index}`} command={command} commandInputs={commandInputs} color={color} onRemove={() => handleRemoveCommand(command)} />)
+    const commands = selectedTile.commands.map((command, index) => {
+        let commandInputs = inputMap[(command.class || '') + command.type];
+        let color = colorMap[command.class || ''];
+        return (<CommandComp key={`${index}`} command={command} commandInputs={commandInputs} color={color} onUpdate={(command) => handleUpdateCommand(command, index)} onRemove={() => handleRemoveCommand(command)} />)
     });
 
-    const availableCommands = commandState.availableCommands.map((command, index) => {
-        let color = commandState.colorMap[command.class || ''];
+    const availableCommandComps = availableCommands.map((command, index) => {
+        let color = colorMap[command.class || ''];
         return (<CommandComp key={index} command={command} commandInputs={command.commandInputs} color={color} onAdd={() => handleAddCommand(command)} />)
     });
 
     return (
         <div style={{ flexGrow: 1, display: 'grid', gridTemplateRows: 'auto 1fr auto', gap: '1rem' }}>
 
-            <Typography variant="h4">{tile.id === "0" ? 'New Tile' : tile.name}</Typography>
+            <Typography variant="h4">{selectedTile.id === "0" ? 'New Tile' : selectedTile.name}</Typography>
 
             <div style={{ overflow: 'auto', padding: '1rem 1rem 1rem 0' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -156,26 +154,40 @@ export default function TileEdit({ tile, onDelete, onSave, onDeselect }: Props) 
                             id="tileName"
                             label="Tile Name"
                             variant="outlined"
-                            value={state.name}
+                            value={selectedTile.name}
                             onChange={handleNameChange} />
 
-                        <IconPicker value={state.icon} onChange={handleIconChange}></IconPicker>
+                        <IconPicker value={selectedTile.icon || ''} onChange={handleIconChange}></IconPicker>
 
                         <TextField
                             id="processName"
                             label="Process"
                             variant="outlined"
-                            value={state.processName}
+                            value={selectedTile.processName || ""}
                             onChange={handleProcessNameChange} />
 
                         <TextField
                             label="Color"
-                            value={state.color}
+                            value={selectedTile.color || ""}
                             type={"color"}
-                            onChange={handleColorChange} />
+                            onChange={handleColorChange}
+                            InputProps={{
+                                endAdornment: (
+                                    <IconButton
+                                        sx={{ visibility: selectedTile.color ? "visible" : "hidden" }}
+                                        onClick={handleClearColorClick}
+                                    >
+                                        <Clear />
+                                    </IconButton>
+                                )
+                            }}
+                            sx={{
+                                m: 2,
+                                "& .Mui-focused .MuiIconButton-root": { color: "primary.main" },
+                            }} />
 
                     </Box>
-                    <TileComp tile={state}></TileComp>
+                    <TileComp tile={selectedTile}></TileComp>
                 </div>
 
                 <Typography variant="h5">Commands</Typography>
@@ -183,19 +195,19 @@ export default function TileEdit({ tile, onDelete, onSave, onDeselect }: Props) 
                 <div className="command-container">
 
                     <div className="commands">
-                        <p hidden={tile.commands?.length > 0}>Drag commands here</p>
+                        <p hidden={selectedTile.commands?.length > 0}>Drag commands here</p>
                         {commands}
                     </div>
 
                     <div className="command-list">
-                        {availableCommands}
+                        {availableCommandComps}
                     </div>
 
                 </div>
             </div>
 
             <div style={{ display: 'flex', gap: '1rem' }}>
-                <Button variant="contained" onClick={() => onSave(state)}>
+                <Button variant="contained" onClick={handleSave}>
                     Save
                 </Button>
 
@@ -203,7 +215,7 @@ export default function TileEdit({ tile, onDelete, onSave, onDeselect }: Props) 
                     Cancel
                 </Button>
 
-                <Button variant="outlined" onClick={() => onDelete(state)}>
+                <Button hidden={selectedTile.id === "0"} variant="outlined" onClick={handleDelete}>
                     Delete
                 </Button>
             </div>

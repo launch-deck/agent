@@ -1,10 +1,14 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { agentDataReducer, connectionMiddleware, pluginsMiddleware } from "./agent-data-slice";
+import { agentDataReducer, connectionMiddleware, eventsMiddleware, pluginsMiddleware } from "./agent-data-slice";
 
 const agentDataStore = configureStore({
     reducer: agentDataReducer,
     middleware: (getDefaultMiddleware) => {
-        return getDefaultMiddleware().concat([connectionMiddleware, pluginsMiddleware])
+        return getDefaultMiddleware().concat([
+            connectionMiddleware,
+            pluginsMiddleware,
+            eventsMiddleware
+        ])
     },
 });
 

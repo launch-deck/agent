@@ -1,7 +1,7 @@
 // See the Electron documentation for details on how to use preload scripts:
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 import { ipcRenderer, contextBridge, IpcRendererEvent } from "electron";
-import { ContextBridgeApi, Settings, Tile } from "./interfaces";
+import { ContextBridgeApi, Event, Settings, Tile } from "./interfaces";
 import { PluginWorker } from "./agent/plugin-worker.class";
 
 const exposedApi: ContextBridgeApi = {
@@ -21,7 +21,8 @@ const exposedApi: ContextBridgeApi = {
 
     // Events
     onConnection: (listener: (event: IpcRendererEvent, connected: number) => void) => ipcRenderer.on('connection', listener),
-    onPluginStatus: (listener: (event: IpcRendererEvent, plugins: PluginWorker[]) => void) => ipcRenderer.on('pluginStatus', listener)
+    onPluginStatus: (listener: (event: IpcRendererEvent, plugins: PluginWorker[]) => void) => ipcRenderer.on('pluginStatus', listener),
+    onEvent: (listener: (event: IpcRendererEvent, message: Event) => void) => ipcRenderer.on('event', listener)
 }
 
 contextBridge.exposeInMainWorld("api", exposedApi);

@@ -7,6 +7,7 @@ import Connect from "./connect";
 import Tiles from "./tiles";
 import { useAppDispatch } from "./redux/hooks";
 import { fetchData } from "./redux/agent-data-slice";
+import Events from "./events";
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -69,6 +70,7 @@ export default function BasicTabs() {
                 <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
                     <Tab label="Connect" {...a11yProps(0)} />
                     <Tab label="Tiles" {...a11yProps(1)} />
+                    <Tab label="Events" {...a11yProps(2)} />
                 </Tabs>
             </Box>
             <TabPanel value={value} index={0}>
@@ -78,6 +80,10 @@ export default function BasicTabs() {
             <TabPanel value={value} index={1}>
                 <Typography variant="h2">Tiles</Typography>
                 <Tiles></Tiles>
+            </TabPanel>
+            <TabPanel value={value} index={2}>
+                <Typography variant="h2">Events</Typography>
+                <Events></Events>
             </TabPanel>
         </Box>
     );

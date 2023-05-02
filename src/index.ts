@@ -61,6 +61,9 @@ const pluginSubscription = agentService.pluginStatus.subscribe(plugins => {
     pluginsStatus = agentService.getCorePlugins().map(plugin => ({ ns: plugin.ns || "", started: true, core: true })).concat(pluginsStatus);
     mainWindow?.webContents.send('pluginStatus', pluginsStatus);
 });
+const eventSubscription = agentService.eventObservable.subscribe((event) => {
+    mainWindow?.webContents.send('event', event);
+})
 agentService.init();
 
 const createWindow = (): void => {
@@ -144,6 +147,7 @@ app.on('activate', () => {
 app.on('before-quit', () => {
     connectionSubscription.unsubscribe();
     pluginSubscription.unsubscribe();
+    eventSubscription.unsubscribe();
     agentService.stopAllPlugins();
 });
 

@@ -1,11 +1,11 @@
-import { combineLatest, firstValueFrom, map, Observable, shareReplay, Subscription } from "rxjs";
+import { combineLatest, firstValueFrom, map, filter, Observable, shareReplay, Subscription } from "rxjs";
 import type { ClientSettings, ClientTile, Command, Plugin } from "@launch-deck/common";
 import { AgentHubService } from "./agent-hub.service";
 import { CommandService } from "./command.service";
 import { DataService } from "./data.service";
 import { PluginService } from "./plugin.service";
 import { SettingsService } from "./settings.service";
-import { StateService } from "./state.service";
+import { EventService } from "./event.service";
 import { ActiveWindowService } from "./active-window.service";
 import { log } from 'electron-log';
 import { AgentData, Settings, Tile } from "../interfaces";
@@ -17,7 +17,7 @@ export class AgentService {
     private readonly dataService: DataService;
     private readonly pluginService: PluginService;
     private readonly settingsService: SettingsService;
-    private readonly stateService: StateService;
+    private readonly eventService: EventService;
     private readonly window: ActiveWindowService;
 
     readonly dataObservable: Observable<AgentData>;
@@ -31,6 +31,10 @@ export class AgentService {
         return this.pluginService.pluginStatus;
     }
 
+    public get eventObservable() {
+        return this.eventService.events;
+    }
+
     constructor() {
         this.client = new AgentHubService();
         this.dataService = new DataService();
@@ -38,7 +42,7 @@ export class AgentService {
         this.window = new ActiveWindowService();
         this.commandService = new CommandService(this.pluginService);
         this.settingsService = new SettingsService(this.pluginService);
-        this.stateService = new StateService(this.pluginService, this.window);
+        this.eventService = new EventService(this.pluginService, this.window);
 
         // Set up the data observable to combine data from plugins
         this.dataObservable = this.dataService.observeData().pipe(
@@ -106,13 +110,13 @@ export class AgentService {
                         }), clientSettings: agentData.settings.clientSettings
                     };
                 })),
-                this.stateService.state
-            ]).subscribe(async ([{ sortedTiles, clientSettings }, agentState]) => {
+                this.eventService.events.pipe(
+                    filter(event => event.ns === 'activeWindow'),
+                    map(event => event.value)
+                )
+            ]).subscribe(async ([{ sortedTiles, clientSettings }, activeWindow]) => {
 
                 log("Sending data");
-
-                // Determine based on events if a tile should be active
-                const currentProcessName = agentState.coreState?.activeWindow;
 
                 const tiles: ClientTile[] = sortedTiles.map(tile => ({
                     id: tile.id,
@@ -120,7 +124,7 @@ export class AgentService {
                     icon: tile.icon,
                     color: tile.color,
                     parentId: tile.parentId,
-                    active: currentProcessName?.toLowerCase() === tile.processName?.toLowerCase()
+                    active: activeWindow?.toLowerCase() === tile.processName?.toLowerCase()
                 }));
 
                 await this.client.sendData({

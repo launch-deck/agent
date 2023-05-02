@@ -11,12 +11,14 @@ import { useAppDispatch, useAppSelector } from "./redux/hooks";
 import { removeTile, resetSelectedTile, selectTile, upsertTile, updateSelectedTile, getAvailableCommands } from "./redux/agent-data-slice";
 import IconButton from "@mui/material/IconButton";
 import Clear from '@mui/icons-material/Clear';
+import Autocomplete from "@mui/material/Autocomplete";
 
 export default function TileEdit() {
 
     const dispatch = useAppDispatch();
     const selectedTile = useAppSelector(state => state.selectedTile);
     const availableCommands = useAppSelector(state => state.availableCommands);
+    const events = useAppSelector(state => state.events);
 
     useEffect(() => {
         dispatch(getAvailableCommands());
@@ -135,6 +137,11 @@ export default function TileEdit() {
         return (<CommandComp key={index} command={command} commandInputs={command.commandInputs} color={color} onAdd={() => handleAddCommand(command)} />)
     });
 
+    const eventValueOptions = events
+        .filter(event => event.ns === "activeWindow")
+        .map(event => event.value)
+        .filter((value, index, array) => array.indexOf(value) === index);
+
     return (
         <div style={{ flexGrow: 1, display: 'grid', gridTemplateRows: 'auto 1fr auto', gap: '1rem' }}>
 
@@ -159,12 +166,17 @@ export default function TileEdit() {
 
                         <IconPicker value={selectedTile.icon || ''} onChange={handleIconChange}></IconPicker>
 
-                        <TextField
-                            id="processName"
-                            label="Process"
-                            variant="outlined"
+                        <Autocomplete
                             value={selectedTile.processName || ""}
-                            onChange={handleProcessNameChange} />
+                            onChange={handleProcessNameChange}
+                            freeSolo
+                            autoSelect
+                            disablePortal
+                            id="activeOnEventValue"
+                            options={eventValueOptions}
+                            sx={{ width: 300 }}
+                            renderInput={(params) => <TextField {...params} label="Process" />}
+                        />
 
                         <TextField
                             label="Color"

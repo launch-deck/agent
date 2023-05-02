@@ -14,7 +14,13 @@ export interface ContextBridgeApi {
     removeTile: (id: string) => Promise<string>,
     updateSortOrder: (order: string[]) => Promise<string[]>,
     onConnection: (listener: (event: IpcRendererEvent, connected: number) => void) => void,
-    onPluginStatus: (listener: (event: IpcRendererEvent, plugins: any[]) => void) => void
+    onPluginStatus: (listener: (event: IpcRendererEvent, plugins: any[]) => void) => void,
+    onEvent: (listener: (event: IpcRendererEvent, message: Event) => void) => void
+}
+
+export interface Event {
+    ns: string
+    value: string
 }
 
 export interface AgentData {
@@ -23,11 +29,6 @@ export interface AgentData {
     tiles: Tile[];
     settings: Settings;
     tileOrder: string[];
-}
-
-export interface AgentState {
-    coreState: { [key: string]: any }
-    pluginState: { [key: string]: { [key: string]: any } }
 }
 
 export interface Settings {

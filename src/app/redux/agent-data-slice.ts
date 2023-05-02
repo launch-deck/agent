@@ -1,21 +1,22 @@
 import { Middleware, PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { v4 } from 'uuid';
-import { AgentData, ContextBridgeApi, Settings, Tile } from "../../interfaces";
+import { AgentData, ContextBridgeApi, Settings, Tile, Event } from "../../interfaces";
 import { Command } from "@launch-deck/common";
 
 const contextBridge = (window as any).api as ContextBridgeApi;
 
 export interface LoadedPlugin {
-    ns: string,
-    started: boolean,
+    ns: string
+    started: boolean
     core: boolean
-};
+}
 
 export interface State {
     agentData: AgentData
     connectionState: ConnectionState
     loadedPlugins: LoadedPlugin[]
     availableCommands: Command[]
+    events: Event[]
     selectedTile?: Tile
 }
 
@@ -45,6 +46,7 @@ const initialState: State = {
     connectionState: ConnectionState.disconnected,
     loadedPlugins: [],
     availableCommands: [],
+    events: [],
     selectedTile: undefined
 }
 
@@ -94,6 +96,9 @@ const agentDataSlice = createSlice({
         },
         setLoadedPlugins: (state, action: PayloadAction<LoadedPlugin[]>) => {
             state.loadedPlugins = action.payload;
+        },
+        addEvent: (state, action: PayloadAction<Event>) => {
+            state.events = state.events.concat(action.payload);
         }
     },
     extraReducers(builder) {
@@ -157,6 +162,10 @@ export const pluginsMiddleware: Middleware = store => {
     contextBridge.onPluginStatus((e, plugins) => store.dispatch(setLoadedPlugins(plugins)));
     return next => action => next(action);
 }
+export const eventsMiddleware: Middleware = store => {
+    contextBridge.onEvent((e, event) => store.dispatch(addEvent(event)));
+    return next => action => next(action);
+}
 
-export const { selectTile, resetSelectedTile, updateSelectedTile, updateSettings, setServerAddress, setAgentCode, setConnectionState, setLoadedPlugins } = agentDataSlice.actions;
+export const { selectTile, resetSelectedTile, updateSelectedTile, updateSettings, setServerAddress, setAgentCode, setConnectionState, setLoadedPlugins, addEvent } = agentDataSlice.actions;
 export const agentDataReducer = agentDataSlice.reducer;
